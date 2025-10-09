@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <div className="w-full h-screen bg-black text-white flex items-center justify-center">
       <div className="max-w-md w-full p-10 bg-black border-2 border-yellow-400 rounded-lg">
-        <h1 className="text-2xl md:text-3xl arcade-title text-center mb-6 text-yellow-400">SUBWAY SURFERS</h1>
+        <h1 className="text-2xl md:text-3xl arcade-title text-center mb-6 text-yellow-400">UTN RUNNER</h1>
         <p className="text-center text-xs arcade-text opacity-90 mb-8">BIENVENIDO! ELIGE UNA OPCION PARA COMENZAR.</p>
 
         <div className="flex flex-col space-y-4">
