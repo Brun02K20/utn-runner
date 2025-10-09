@@ -166,19 +166,21 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
   }, [currentLane, isJumping, isGameOver, isPaused])
 
   useEffect(() => {
-    if (isGameOver || isPaused || keyboardActive) return
+    // Solo bloquear si el teclado está activo, permitir controles de mano durante pausa/game over para testing
+    if (keyboardActive) return
 
-    // Apply hand lane control
-    if (handLane && handLane !== currentLane) {
+    // Apply hand lane control solo cuando el juego está activo
+    if (handLane && handLane !== currentLane && !isGameOver && !isPaused) {
       setCurrentLane(handLane)
       setTargetX(GAME_CONFIG.lanes[handLane])
     }
   }, [handLane, currentLane, isGameOver, isPaused, keyboardActive])
 
   useEffect(() => {
-    if (isGameOver || isPaused || keyboardActive) return
+    // Solo bloquear si el teclado está activo, permitir controles de mano durante pausa/game over para testing
+    if (keyboardActive) return
 
-    if (handJump && !isJumping) {
+    if (handJump && !isJumping && !isGameOver && !isPaused) {
       setIsJumping(true)
       setJumpStartTime(gameTimeManager.getGameTime())
     }

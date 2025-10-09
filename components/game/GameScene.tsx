@@ -95,8 +95,9 @@ export default function GameScene() {
 
       {/* Debug panel - set visible={true} to enable */}
       <GameTimeDebug visible={false} />
-      {/* Área de la cámara - ocupa 1/3 de la pantalla */}
-      <div className="h-1/3 p-4 bg-gray-800">
+      
+      {/* Área de la cámara - posicionada fija en la parte inferior */}
+      <div className="absolute bottom-0 left-0 right-0 h-1/3 p-4 bg-gray-800 z-10">
         <div className="w-full h-full rounded-lg overflow-hidden">
           <HandCameraImpl 
             onHandDetected={(data) => {
@@ -104,6 +105,7 @@ export default function GameScene() {
             }}
             width={640}
             height={240}
+            isPaused={isPaused || isGameOver}
           />
         </div>
       </div>
