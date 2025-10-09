@@ -12,7 +12,7 @@ const PressStart2P = Press_Start_2P({
 })
 
 export const metadata: Metadata = {
-  title: 'v0 App',
+  title: 'UTN RUNNER',
   description: 'Created with v0',
   generator: 'v0.app',
 }

@@ -10,7 +10,7 @@ export default function GamePage() {
           {/* Game section - full screen */}
           <div className="w-full h-full relative">
             <div className="absolute top-4 left-4 text-white z-10 text-left">
-              <h1 className="text-2xl arcade-title drop-shadow-lg">SUBWAY SURFERS CLONE</h1>
+              <h1 className="text-2xl arcade-title drop-shadow-lg">UTN RUNNER</h1>
               <p className="text-xs arcade-text opacity-75 mt-2">← → ARROWS: CHANGE LANES | ↑ JUMP | ESC: PAUSE</p>
             </div>
             <GameScene />
