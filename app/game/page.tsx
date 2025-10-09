@@ -2,7 +2,7 @@ import ConsoleCleanerProvider from '@/components/ConsoleCleanerProvider'
 import GameScene from '@/components/game/GameScene'
 import { HandControlProvider } from '@/components/vision/HandControlContext'
 import Image from 'next/image'
-
+// a
 export default function GamePage() {
   return (
     <ConsoleCleanerProvider>
