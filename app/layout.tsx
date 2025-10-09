@@ -24,7 +24,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={PressStart2P.variable}>
-      <head />
+      <head>
+        <link rel="icon" href="/utn-2.svg" />
+      </head>
       <body className={PressStart2P.variable}>
         {children}
         <Analytics />
