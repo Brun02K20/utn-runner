@@ -97,14 +97,14 @@ export default function UIOverlay({ score, isGameOver, isPaused, finalScore, onR
 
   const renderLetterBox = (i: number) => {
     return (
-      <div key={i} className="w-12 h-14 flex items-center justify-center mx-1 border-2 border-white/40 text-xl md:text-2xl font-bold text-white">
+      <div key={i} className="w-12 h-14 flex items-center justify-center mx-1 border-2 border-yellow-400 bg-black/50 text-xl arcade-font text-white">
         <input
           ref={(el) => { inputsRef.current[i] = el; }}
           value={letters[i] ?? ''}
           onChange={(e) => handleLetterChange(i, e.target.value)}
           onKeyDown={(e) => handleLetterKeyDown(e, i)}
           maxLength={1}
-          className="w-full h-full bg-transparent text-center text-xl md:text-2xl outline-none caret-white"
+          className="w-full h-full bg-transparent text-center text-xl arcade-font outline-none caret-yellow-400 text-yellow-400"
           aria-label={`letter-${i}`}
         />
       </div>
@@ -115,20 +115,20 @@ export default function UIOverlay({ score, isGameOver, isPaused, finalScore, onR
     <>
       {/* Score display */}
       {!isGameOver && (
-        <div className="absolute top-4 right-4 bg-black/70 text-white px-4 py-2 rounded-lg">
-          <div className="text-xl font-bold">Score: {Math.floor(score)}</div>
-          <div className="text-sm opacity-75">Speed: {GAME_CONFIG.playerSpeed.toFixed(2)}</div>
-          <div className="text-sm opacity-75">Jump: {GAME_CONFIG.jump.duration.toFixed(2)}s</div>
-          <div className="text-sm opacity-75">Spawn: {GAME_CONFIG.obstacles.spawnInterval.toFixed(2)}s</div>
+        <div className="absolute top-4 right-4 bg-black/70 text-white px-4 py-2 rounded-lg border border-white/20">
+          <div className="text-lg arcade-font">SCORE: {Math.floor(score)}</div>
+          <div className="text-xs arcade-text opacity-75 mt-1">SPEED: {GAME_CONFIG.playerSpeed.toFixed(2)}</div>
+          <div className="text-xs arcade-text opacity-75">JUMP: {GAME_CONFIG.jump.duration.toFixed(2)}S</div>
+          <div className="text-xs arcade-text opacity-75">SPAWN: {GAME_CONFIG.obstacles.spawnInterval.toFixed(2)}S</div>
         </div>
       )}
 
       {/* Pause overlay */}
       {isPaused && !isGameOver && (
-        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-20">
-          <div className="bg-white p-8 rounded-lg text-center">
-            <h2 className="text-2xl font-bold mb-2">PAUSED</h2>
-            <p className="text-gray-600">Press ESC to continue</p>
+        <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-20">
+          <div className="bg-black p-8 rounded-lg text-center border-2 border-yellow-400 text-white">
+            <h2 className="text-3xl arcade-title mb-4 text-yellow-400">PAUSED</h2>
+            <p className="arcade-text text-sm">PRESS ESC TO CONTINUE</p>
           </div>
         </div>
       )}
@@ -137,43 +137,43 @@ export default function UIOverlay({ score, isGameOver, isPaused, finalScore, onR
       {isGameOver && (
         <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-20">
 
-          <div className="bg-black p-8 rounded-lg text-center max-w-md border border-white/10 text-white">
-            <h2 className="text-3xl font-bold mb-4 text-red-500 drop-shadow-md">GAME OVER</h2>
-            <p className="text-lg mb-2">You crashed into an obstacle!</p>
-            <p className="text-xl font-semibold mb-4">Final Score: {Math.floor(finalScore)}</p>
+          <div className="bg-black p-8 rounded-lg text-center max-w-md border-2 border-red-500 text-white">
+            <h2 className="text-4xl arcade-title mb-6 text-red-500 drop-shadow-md">GAME OVER</h2>
+            <p className="text-sm arcade-text mb-3">YOU CRASHED INTO AN OBSTACLE!</p>
+            <p className="text-lg arcade-font mb-6 text-yellow-400">FINAL SCORE: {Math.floor(finalScore)}</p>
 
-            <div className="mb-4">
-              <p className="text-sm mb-2">Enter your name (5 letters):</p>
+            <div className="mb-6">
+              <p className="text-xs arcade-text mb-3">ENTER YOUR NAME (5 LETTERS):</p>
               <div className="flex items-center justify-center">
                 <div className="flex" onClick={() => inputsRef.current[0]?.focus()} role="button" tabIndex={0}>
                   {[0, 1, 2, 3, 4].map((i) => renderLetterBox(i))}
                 </div>
               </div>
-              <p className="text-xs opacity-70 mt-2">Type letters directly. Backspace removes last letter.</p>
+              <p className="text-xs arcade-text opacity-70 mt-3">TYPE LETTERS DIRECTLY. BACKSPACE REMOVES LAST LETTER.</p>
             </div>
 
-            <div className="flex items-center justify-center space-x-3">
+            <div className="flex items-center justify-center space-x-4">
               <button
                 onClick={submitScore}
                 disabled={posting || posted}
-                className={`px-4 py-2 rounded-md font-semibold ${
+                className={`px-4 py-2 rounded-md arcade-text text-sm ${
                   posting || posted
-                    ? "bg-gray-600 text-white"
-                    : "bg-white text-black border border-black hover:scale-105"
+                    ? "bg-gray-600 text-white border-2 border-gray-500"
+                    : "bg-yellow-400 text-black border-2 border-yellow-600 hover:scale-105"
                 } transition-transform`}
               >
-                {posting ? "Sending..." : posted ? "Submitted" : "Submit Score"}
+                {posting ? "SENDING..." : posted ? "SUBMITTED" : "SUBMIT SCORE"}
               </button>
 
               <button
                 onClick={onRestart}
-                className="bg-white text-black px-4 py-2 rounded-md font-semibold border border-black hover:opacity-90"
+                className="bg-green-500 text-white px-4 py-2 rounded-md arcade-text text-sm border-2 border-green-700 hover:opacity-90"
               >
-                Play Again
+                PLAY AGAIN
               </button>
             </div>
 
-            {message && <div className="mt-3 text-sm">{message}</div>}
+            {message && <div className="mt-3 text-xs arcade-text">{message}</div>}
           </div>
         </div>
       )}

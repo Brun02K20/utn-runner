@@ -75,8 +75,8 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-press-start-2p);
+  --font-mono: var(--font-press-start-2p);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -115,10 +115,28 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* Press Start 2P - Fuente Arcade Global */
 .press-start-2p-regular {
   font-family: "Press Start 2P", system-ui;
   font-weight: 400;
   font-style: normal;
+}
+
+.arcade-font {
+  font-family: var(--font-press-start-2p), 'Press Start 2P', monospace !important;
+}
+
+/* Ajustes específicos para mejorar legibilidad de Press Start 2P */
+.arcade-title {
+  font-family: var(--font-press-start-2p), 'Press Start 2P', monospace !important;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+
+.arcade-text {
+  font-family: var(--font-press-start-2p), 'Press Start 2P', monospace !important;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
 }
 
 @layer base {
@@ -127,5 +145,9 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-press-start-2p), 'Press Start 2P', monospace;
+  }
+  h1, h2, h3, h4, h5, h6, p, span, div, button, input, label {
+    font-family: var(--font-press-start-2p), 'Press Start 2P', monospace;
   }
 }

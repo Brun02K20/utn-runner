@@ -503,16 +503,16 @@ export default function HandCameraImpl({ onHandDetected, width = 640, height = 4
       
       {error ? (
         <div className="text-white text-center p-4">
-          <p className="text-lg font-semibold">{error}</p>
-          <p className="text-sm opacity-75">Verifica permisos de cámara y consola para más detalles.</p>
+          <p className="text-lg arcade-title text-red-400">{error}</p>
+          <p className="text-xs arcade-text opacity-75 mt-2">VERIFICA PERMISOS DE CAMARA Y CONSOLA PARA MAS DETALLES.</p>
         </div>
       ) : (
         <>
           <button 
-            className="absolute top-2 right-2 z-20 bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs"
+            className="absolute top-2 right-2 z-20 bg-blue-500 hover:bg-blue-700 text-white arcade-text py-1 px-2 rounded text-xs"
             onClick={() => setShowCamera(!showCamera)}
           >
-            {showCamera ? 'Ocultar Cámara' : 'Mostrar Cámara'}
+            {showCamera ? 'OCULTAR CAM' : 'MOSTRAR CAM'}
           </button>
 
           <video
@@ -546,8 +546,8 @@ export default function HandCameraImpl({ onHandDetected, width = 640, height = 4
                   borderRight: lane === 'right' ? 'none' : undefined
                 }}
               >
-                <span className="text-white text-sm font-bold uppercase drop-shadow-lg">
-                  {lane === 'left' ? 'Izquierda' : lane === 'center' ? 'Centro' : 'Derecha'}
+                <span className="text-white text-xs arcade-font uppercase drop-shadow-lg">
+                  {lane === 'left' ? 'IZQUIERDA' : lane === 'center' ? 'CENTRO' : 'DERECHA'}
                 </span>
               </div>
             ))}
@@ -562,8 +562,8 @@ export default function HandCameraImpl({ onHandDetected, width = 640, height = 4
             }}
           />
 
-          <div className="absolute top-2 left-2 text-white text-xs bg-black/50 p-1 rounded z-10">
-            Lane: {activeLane} | FPS: {TARGET_FPS} | Camera: {showCamera ? 'On' : 'Off'} | Detection: {isDetectionPaused ? 'Paused' : 'Active'}
+          <div className="absolute top-2 left-2 text-white text-xs arcade-text bg-black/50 p-1 rounded z-10">
+            LANE: {activeLane?.toUpperCase() || 'NONE'} | FPS: {TARGET_FPS} | CAM: {showCamera ? 'ON' : 'OFF'} | DET: {isDetectionPaused ? 'PAUSED' : 'ACTIVE'}
           </div>
         </>
       )}
