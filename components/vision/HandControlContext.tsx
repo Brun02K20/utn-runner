@@ -5,8 +5,10 @@ import { createContext, useContext, useState, type ReactNode } from "react"
 interface HandControlContextType {
   lane: "left" | "center" | "right" | null
   jump: boolean
+  isClosed: boolean
   setLane: (lane: "left" | "center" | "right" | null) => void
   setJump: (jump: boolean) => void
+  setIsClosed: (isClosed: boolean) => void
 }
 
 export const HandControlContext = createContext<HandControlContextType | undefined>(undefined)
@@ -14,8 +16,9 @@ export const HandControlContext = createContext<HandControlContextType | undefin
 export function HandControlProvider({ children }: { children: ReactNode }) {
   const [lane, setLane] = useState<"left" | "center" | "right" | null>(null)
   const [jump, setJump] = useState(false)
+  const [isClosed, setIsClosed] = useState(false)
 
-  return <HandControlContext.Provider value={{ lane, jump, setLane, setJump }}>{children}</HandControlContext.Provider>
+  return <HandControlContext.Provider value={{ lane, jump, isClosed, setLane, setJump, setIsClosed }}>{children}</HandControlContext.Provider>
 }
 
 export function useHandControlContext() {

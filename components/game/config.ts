@@ -40,7 +40,7 @@ function sigmoidScale(score: number, min: number, max: number, midpoint = 500, s
 }
 
 export function updateGameDifficulty(score: number) {
-  GAME_CONFIG.playerSpeed = sigmoidScale(score, 0.3, 1.0)
-  GAME_CONFIG.jump.duration = sigmoidScale(score, 0.9, 0.5)
-  GAME_CONFIG.obstacles.spawnInterval = sigmoidScale(score, 1.0, 0.2)
+  GAME_CONFIG.playerSpeed = sigmoidScale(score, 0.3, 1.0, 750) // 50% más tiempo hasta velocidad máxima
+  GAME_CONFIG.jump.duration = sigmoidScale(score, 0.9, 0.5, 750) // 50% más tiempo hasta salto más rápido
+  GAME_CONFIG.obstacles.spawnInterval = sigmoidScale(score, 1.0, 0.2, 750) // 50% más tiempo hasta spawn más frecuente
 }

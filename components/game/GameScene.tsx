@@ -3,7 +3,8 @@
 import { Canvas } from "@react-three/fiber"
 import Player from "./Player"
 import UIOverlay from "./UIOverlay"
-import { Suspense, useState, useEffect } from "react"
+import MiniGameOverlay from "./MiniGameOverlay"
+import { Suspense, useState, useEffect, useRef } from "react"
 import { GAME_CONFIG, updateGameDifficulty } from "./config"
 import HandCameraImpl from "../vision/HandCameraImpl"
 import { gameTimeManager } from "./GameTimeManager"
@@ -14,6 +15,10 @@ export default function GameScene() {
   const [score, setScore] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [finalScore, setFinalScore] = useState(0)
+  const [isMiniGameActive, setIsMiniGameActive] = useState(false)
+  const [isInvulnerable, setIsInvulnerable] = useState(false)
+  const [invulnerabilityTimeLeft, setInvulnerabilityTimeLeft] = useState(0)
+  const miniGameCompleteRef = useRef<((won: boolean) => void) | null>(null)
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -29,6 +34,20 @@ export default function GameScene() {
   const handleGameOver = () => {
     setFinalScore(score)
     setIsGameOver(true)
+  }
+
+  const handleMiniGameStart = () => {
+    setIsMiniGameActive(true)
+  }
+
+  const handleMiniGameEnd = () => {
+    setIsMiniGameActive(false)
+  }
+
+  const handleMiniGameComplete = (won: boolean) => {
+    if (miniGameCompleteRef.current) {
+      miniGameCompleteRef.current(won)
+    }
   }
 
   const handleRestart = () => {
@@ -64,6 +83,9 @@ export default function GameScene() {
     <div className="w-full h-full relative">
       <Canvas camera={{ position: [0, 5, -10], fov: 75 }} className="w-full h-full" shadows>
         <Suspense fallback={null}>
+          {/* Skybox blanca */}
+          <color attach="background" args={['#ffffff']} />
+          
           {/* Lighting */}
           <ambientLight intensity={0.4} />
           <directionalLight
@@ -81,7 +103,18 @@ export default function GameScene() {
           />
 
           {/* Player */}
-          <Player onGameOver={handleGameOver} isGameOver={isGameOver} isPaused={isPaused} onScoreUpdate={setScore} />
+          <Player 
+            onGameOver={handleGameOver} 
+            isGameOver={isGameOver} 
+            isPaused={isPaused} 
+            onScoreUpdate={setScore}
+            onMiniGameStart={handleMiniGameStart}
+            onMiniGameEnd={handleMiniGameEnd}
+            isMiniGameActive={isMiniGameActive}
+            miniGameCompleteRef={miniGameCompleteRef}
+            onInvulnerabilityChange={setIsInvulnerable}
+            onInvulnerabilityTimeUpdate={setInvulnerabilityTimeLeft}
+          />
         </Suspense>
       </Canvas>
 
@@ -91,6 +124,14 @@ export default function GameScene() {
         isPaused={isPaused}
         finalScore={finalScore}
         onRestart={handleRestart}
+        isInvulnerable={isInvulnerable}
+        invulnerabilityTimeLeft={invulnerabilityTimeLeft}
+      />
+
+      {/* MiniGame Overlay */}
+      <MiniGameOverlay
+        isVisible={isMiniGameActive}
+        onComplete={handleMiniGameComplete}
       />
 
       {/* Debug panel - set visible={true} to enable */}
@@ -105,7 +146,7 @@ export default function GameScene() {
             }}
             width={640}
             height={240}
-            isPaused={isPaused || isGameOver}
+            isPaused={(isPaused || isGameOver) && !isMiniGameActive}
           />
         </div>
       </div>

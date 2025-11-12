@@ -9,9 +9,11 @@ interface UIOverlayProps {
   isPaused: boolean
   finalScore: number
   onRestart: () => void
+  isInvulnerable?: boolean
+  invulnerabilityTimeLeft?: number
 }
 
-export default function UIOverlay({ score, isGameOver, isPaused, finalScore, onRestart }: UIOverlayProps) {
+export default function UIOverlay({ score, isGameOver, isPaused, finalScore, onRestart, isInvulnerable, invulnerabilityTimeLeft }: UIOverlayProps) {
   const [letters, setLetters] = useState<string[]>(["", "", "", "", ""])
   const [posting, setPosting] = useState(false)
   const [posted, setPosted] = useState(false)
@@ -120,6 +122,40 @@ export default function UIOverlay({ score, isGameOver, isPaused, finalScore, onR
           <div className="text-xs arcade-text opacity-75 mt-1">SPEED: {GAME_CONFIG.playerSpeed.toFixed(2)}</div>
           <div className="text-xs arcade-text opacity-75">JUMP: {GAME_CONFIG.jump.duration.toFixed(2)}S</div>
           <div className="text-xs arcade-text opacity-75">SPAWN: {GAME_CONFIG.obstacles.spawnInterval.toFixed(2)}S</div>
+          
+          {/* Indicador de invulnerabilidad */}
+          {isInvulnerable && (
+            <div className="text-xs arcade-text mt-2 text-green-400 animate-pulse border-t border-green-400/30 pt-2">
+              <div className="flex items-center justify-between">
+                <span>🛡️ PROTEGIDO</span>
+                <span>{invulnerabilityTimeLeft ? `${invulnerabilityTimeLeft.toFixed(1)}s` : ''}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Indicador central de invulnerabilidad */}
+      {isInvulnerable && !isGameOver && (
+        <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+          <div className="bg-green-900/80 text-green-100 px-6 py-3 rounded-lg border-2 border-green-400 animate-pulse">
+            <div className="text-center">
+              <div className="text-xl arcade-font mb-1">🛡️ INVULNERABLE 🛡️</div>
+              <div className="text-sm arcade-text">
+                {invulnerabilityTimeLeft ? `${invulnerabilityTimeLeft.toFixed(1)}s restantes` : ''}
+              </div>
+              <div className="w-32 bg-green-700 rounded-full h-1 mt-2">
+                <div 
+                  className="bg-green-300 h-1 rounded-full transition-all duration-100"
+                  style={{ 
+                    width: invulnerabilityTimeLeft && invulnerabilityTimeLeft > 0 
+                      ? `${(invulnerabilityTimeLeft / 5) * 100}%` 
+                      : '0%' 
+                  }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

@@ -1,6 +1,7 @@
 "use client"
 
 import MateModel from "../MateModel"
+import ObstacleModel from "../ObstacleModel"
 import { GAME_CONFIG } from "./config"
 
 interface Obstacle {
@@ -8,6 +9,7 @@ interface Obstacle {
   x: number
   z: number
   lane: string
+  type: "libros" | "pcvieja" | "silla"
 }
 
 interface Mate {
@@ -28,10 +30,11 @@ export default function Obstacles({ obstacles, mates, onCollectMate }: Obstacles
     <>
       {/* Obstacles */}
       {obstacles.map((obstacle) => (
-        <mesh key={obstacle.id} position={[obstacle.x, GAME_CONFIG.obstacles.size[1] / 2 - 1, obstacle.z]} castShadow>
-          <boxGeometry args={GAME_CONFIG.obstacles.size} />
-          <meshStandardMaterial color="red" />
-        </mesh>
+        <ObstacleModel
+          key={obstacle.id}
+          position={[obstacle.x, 0, obstacle.z]}
+          type={obstacle.type}
+        />
       ))}
 
       {/* Mates */}

@@ -18,6 +18,7 @@ interface Obstacle {
   x: number
   z: number
   lane: Lane
+  type: "libros" | "pcvieja" | "silla"
 }
 
 interface Mate {
@@ -47,9 +48,15 @@ interface PlayerProps {
   isGameOver: boolean
   isPaused: boolean
   onScoreUpdate: (score: number) => void
+  onMiniGameStart: () => void
+  onMiniGameEnd: () => void
+  isMiniGameActive: boolean
+  miniGameCompleteRef?: React.MutableRefObject<((won: boolean) => void) | null>
+  onInvulnerabilityChange?: (isInvulnerable: boolean) => void
+  onInvulnerabilityTimeUpdate?: (timeLeft: number) => void
 }
 
-export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate }: PlayerProps) {
+export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate, onMiniGameStart, onMiniGameEnd, isMiniGameActive, miniGameCompleteRef, onInvulnerabilityChange, onInvulnerabilityTimeUpdate }: PlayerProps) {
   const meshRef = useRef<Group>(null)
   const terrainRef = useRef<Group>(null)
   const { camera } = useThree()
@@ -75,6 +82,9 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
 
   const [totalDistance, setTotalDistance] = useState(0)
   const spotLightRef = useRef<SpotLight>(null)
+
+  // Mini-game state
+  const [miniGameWon, setMiniGameWon] = useState(false)
 
   const [terrainSegments, setTerrainSegments] = useState<TerrainSegment[]>(() => {
     const initialSegments: TerrainSegment[] = []
@@ -197,6 +207,22 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
     onScoreUpdate(currentScore)
   }, [totalDistance, isGameOver, isPaused, onScoreUpdate])
 
+  // Notificar cambios en el estado de invulnerabilidad
+  useEffect(() => {
+    if (onInvulnerabilityChange) {
+      onInvulnerabilityChange(isInvulnerable)
+    }
+  }, [isInvulnerable, onInvulnerabilityChange])
+
+  // Actualizar tiempo restante de invulnerabilidad
+  useEffect(() => {
+    if (onInvulnerabilityTimeUpdate && isInvulnerable) {
+      const currentTime = gameTimeManager.getGameTime()
+      const timeLeft = Math.max(0, invulnerabilityEndTime - currentTime)
+      onInvulnerabilityTimeUpdate(timeLeft)
+    }
+  }, [isInvulnerable, invulnerabilityEndTime, onInvulnerabilityTimeUpdate])
+
   // Invulnerability will be checked in the main game loop using gameTime
 
   const checkCollisions = (playerX: number, playerY: number, playerZ: number) => {
@@ -219,15 +245,28 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
 
     if (!isInvulnerable) {
       for (const obstacle of obstacles) {
+        // Usar un tamaño de colisión genérico para todos los modelos 3D
         const obstacleBox = new THREE.Box3().setFromCenterAndSize(
-          new THREE.Vector3(obstacle.x, GAME_CONFIG.obstacles.size[1] / 2 - 1, obstacle.z),
-          new THREE.Vector3(...GAME_CONFIG.obstacles.size),
+          new THREE.Vector3(obstacle.x, 1, obstacle.z),
+          new THREE.Vector3(1.2, 2, 1.2),
         )
 
         if (playerBox.intersectsBox(obstacleBox)) {
-          return true
+          console.log(`Collision detected with ${obstacle.type} - invulnerable: ${isInvulnerable}`)
+          // Choque especial con computadora - activar microjuego
+          if (obstacle.type === "pcvieja") {
+            // Remover el obstáculo de la lista y activar microjuego
+            setObstacles(prev => prev.filter(obs => obs.id !== obstacle.id))
+            onMiniGameStart()
+            return false // No terminar el juego inmediatamente
+          } else {
+            // Otros obstáculos causan game over inmediato
+            return true
+          }
         }
       }
+    } else {
+      console.log(`Player is invulnerable - time: ${gameTimeManager.getGameTime()}, end: ${invulnerabilityEndTime}`)
     }
 
     return false
@@ -242,16 +281,48 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
     setInvulnerabilityEndTime(gameTimeManager.getGameTime() + invulnerabilityDurationInSeconds)
   }
 
+  const handleMiniGameComplete = (won: boolean) => {
+    onMiniGameEnd() // Primero terminar el microjuego para que se reanude el tiempo
+    
+    if (won) {
+      // Esperar un frame para que se reanude el gameTimeManager
+      setTimeout(() => {
+        // El jugador ganó el microjuego - 1 segundo de invencibilidad
+        setMiniGameWon(true)
+        setIsInvulnerable(true)
+        const invulnerabilityDurationInSeconds = 2 // 2 segundos
+        const currentGameTime = gameTimeManager.getGameTime()
+        const endTime = currentGameTime + invulnerabilityDurationInSeconds
+        setInvulnerabilityEndTime(endTime)
+        console.log(`Mini-game won! Invulnerability set from ${currentGameTime} to ${endTime}`)
+      }, 100)
+    } else {
+      // El jugador perdió el microjuego - game over
+      onGameOver()
+    }
+  }
+
+  // Exportar la función a través de miniGameCompleteRef
+  useEffect(() => {
+    if (miniGameCompleteRef) {
+      miniGameCompleteRef.current = handleMiniGameComplete
+    }
+  }, [miniGameCompleteRef])
+
   const spawnObstacle = (currentZ: number) => {
     const lanes: Lane[] = ["left", "center", "right"]
     const randomLane = lanes[Math.floor(Math.random() * lanes.length)]
     const laneX = GAME_CONFIG.lanes[randomLane]
+    
+    const obstacleTypes: ("libros" | "pcvieja" | "silla")[] = ["libros", "pcvieja", "silla"]
+    const randomType = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)]
 
     const newObstacle: Obstacle = {
       id: obstacleIdCounter.current++,
       x: laneX,
       z: currentZ + GAME_CONFIG.obstacles.spawnDistance,
       lane: randomLane,
+      type: randomType,
     }
 
     setObstacles((prev) => [...prev, newObstacle])
@@ -336,10 +407,10 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
   useFrame((state, delta) => {
     if (!meshRef.current || isGameOver) return
 
-    // Update game time manager and get processed delta
-    gameTimeManager.setPaused(isPaused)
+    // Update game time manager and get processed delta - pausar también durante microjuego
+    gameTimeManager.setPaused(isPaused || isMiniGameActive)
     
-    if (isPaused) return
+    if (isPaused || isMiniGameActive) return
 
     const timeResult = gameTimeManager.updateTime(delta)
     const { processedDelta, shouldSkipPhysics, isRecoveringFromFreeze } = timeResult
@@ -388,8 +459,17 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
 
     // Check invulnerability using game time
     if (isInvulnerable && gameTimeManager.getGameTime() >= invulnerabilityEndTime) {
+      console.log(`Invulnerability ended at time: ${gameTimeManager.getGameTime()}`)
       setIsInvulnerable(false)
       setInvulnerabilityEndTime(0)
+      if (onInvulnerabilityTimeUpdate) {
+        onInvulnerabilityTimeUpdate(0)
+      }
+    } else if (isInvulnerable && onInvulnerabilityTimeUpdate) {
+      // Actualizar tiempo restante en tiempo real
+      const currentTime = gameTimeManager.getGameTime()
+      const timeLeft = Math.max(0, invulnerabilityEndTime - currentTime)
+      onInvulnerabilityTimeUpdate(timeLeft)
     }
 
     // Lighting follows player smoothly
@@ -467,13 +547,7 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
         castShadow
       />
 
-      {/* Invulnerability ring */}
-      {isInvulnerable && (
-        <mesh position={[meshRef.current?.position.x || 0, 6, meshRef.current?.position.z || 0]}>
-          <ringGeometry args={[1.5, 2, 16]} />
-          <meshStandardMaterial color="#00FF00" emissive="#00FF00" emissiveIntensity={0.5} transparent opacity={0.7} />
-        </mesh>
-      )}
+      {/* Invulnerability visual effects disabled */}
 
       {/* Terrain */}
       <Terrain ref={terrainRef} terrainSegments={terrainSegments} tunnelLights={tunnelLights} wallImages={wallImages} playerZ={positionZ} />
@@ -483,3 +557,5 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
     </>
   )
 }
+
+
