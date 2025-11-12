@@ -52,9 +52,11 @@ interface PlayerProps {
   onMiniGameEnd: () => void
   isMiniGameActive: boolean
   miniGameCompleteRef?: React.MutableRefObject<((won: boolean) => void) | null>
+  onInvulnerabilityChange?: (isInvulnerable: boolean) => void
+  onInvulnerabilityTimeUpdate?: (timeLeft: number) => void
 }
 
-export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate, onMiniGameStart, onMiniGameEnd, isMiniGameActive, miniGameCompleteRef }: PlayerProps) {
+export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate, onMiniGameStart, onMiniGameEnd, isMiniGameActive, miniGameCompleteRef, onInvulnerabilityChange, onInvulnerabilityTimeUpdate }: PlayerProps) {
   const meshRef = useRef<Group>(null)
   const terrainRef = useRef<Group>(null)
   const { camera } = useThree()
@@ -204,6 +206,22 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
 
     onScoreUpdate(currentScore)
   }, [totalDistance, isGameOver, isPaused, onScoreUpdate])
+
+  // Notificar cambios en el estado de invulnerabilidad
+  useEffect(() => {
+    if (onInvulnerabilityChange) {
+      onInvulnerabilityChange(isInvulnerable)
+    }
+  }, [isInvulnerable, onInvulnerabilityChange])
+
+  // Actualizar tiempo restante de invulnerabilidad
+  useEffect(() => {
+    if (onInvulnerabilityTimeUpdate && isInvulnerable) {
+      const currentTime = gameTimeManager.getGameTime()
+      const timeLeft = Math.max(0, invulnerabilityEndTime - currentTime)
+      onInvulnerabilityTimeUpdate(timeLeft)
+    }
+  }, [isInvulnerable, invulnerabilityEndTime, onInvulnerabilityTimeUpdate])
 
   // Invulnerability will be checked in the main game loop using gameTime
 
@@ -444,6 +462,14 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
       console.log(`Invulnerability ended at time: ${gameTimeManager.getGameTime()}`)
       setIsInvulnerable(false)
       setInvulnerabilityEndTime(0)
+      if (onInvulnerabilityTimeUpdate) {
+        onInvulnerabilityTimeUpdate(0)
+      }
+    } else if (isInvulnerable && onInvulnerabilityTimeUpdate) {
+      // Actualizar tiempo restante en tiempo real
+      const currentTime = gameTimeManager.getGameTime()
+      const timeLeft = Math.max(0, invulnerabilityEndTime - currentTime)
+      onInvulnerabilityTimeUpdate(timeLeft)
     }
 
     // Lighting follows player smoothly
@@ -506,7 +532,7 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
       <CharacterModel 
         ref={meshRef}
         position={[0, 0, 0]}
-        isInvulnerable={false}
+        isInvulnerable={isInvulnerable}
       />
 
       {/* Spotlight */}

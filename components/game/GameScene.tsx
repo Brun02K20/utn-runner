@@ -16,6 +16,8 @@ export default function GameScene() {
   const [isPaused, setIsPaused] = useState(false)
   const [finalScore, setFinalScore] = useState(0)
   const [isMiniGameActive, setIsMiniGameActive] = useState(false)
+  const [isInvulnerable, setIsInvulnerable] = useState(false)
+  const [invulnerabilityTimeLeft, setInvulnerabilityTimeLeft] = useState(0)
   const miniGameCompleteRef = useRef<((won: boolean) => void) | null>(null)
 
   useEffect(() => {
@@ -81,6 +83,9 @@ export default function GameScene() {
     <div className="w-full h-full relative">
       <Canvas camera={{ position: [0, 5, -10], fov: 75 }} className="w-full h-full" shadows>
         <Suspense fallback={null}>
+          {/* Skybox blanca */}
+          <color attach="background" args={['#ffffff']} />
+          
           {/* Lighting */}
           <ambientLight intensity={0.4} />
           <directionalLight
@@ -107,6 +112,8 @@ export default function GameScene() {
             onMiniGameEnd={handleMiniGameEnd}
             isMiniGameActive={isMiniGameActive}
             miniGameCompleteRef={miniGameCompleteRef}
+            onInvulnerabilityChange={setIsInvulnerable}
+            onInvulnerabilityTimeUpdate={setInvulnerabilityTimeLeft}
           />
         </Suspense>
       </Canvas>
@@ -117,6 +124,8 @@ export default function GameScene() {
         isPaused={isPaused}
         finalScore={finalScore}
         onRestart={handleRestart}
+        isInvulnerable={isInvulnerable}
+        invulnerabilityTimeLeft={invulnerabilityTimeLeft}
       />
 
       {/* MiniGame Overlay */}

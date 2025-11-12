@@ -172,8 +172,9 @@ const Terrain = forwardRef<Group, TerrainProps>(({ terrainSegments, tunnelLights
           <boxGeometry args={[20, 0.5, GAME_CONFIG.terrain.segmentSize]} />
           <meshStandardMaterial
             map={roofMap}
-            roughness={0.8}
-            metalness={0.1}
+            color="#fafafa"
+            roughness={0.4}
+            metalness={0.02}
           />
         </mesh>
       ))}

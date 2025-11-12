@@ -51,6 +51,7 @@ export default function HandCameraImpl({ onHandDetected, width = 640, height = 4
   const ctx = useContext(HandControlContext as any) as any | undefined;
   const setLaneFromContext: ((lane: "left" | "center" | "right" | null) => void) | undefined = ctx?.setLane;
   const setJumpFromContext: ((j: boolean) => void) | undefined = ctx?.setJump;
+  const setIsClosedFromContext: ((isClosed: boolean) => void) | undefined = ctx?.setIsClosed;
 
   // Fixed computeLane with proper coordinate handling
   const computeLane = useCallback((normalizedX: number): "left" | "center" | "right" | null => {
@@ -177,12 +178,13 @@ export default function HandCameraImpl({ onHandDetected, width = 640, height = 4
 
     try {
       setJumpFromContext?.(isClosed);
+      setIsClosedFromContext?.(isClosed);
     } catch (e) {
       console.warn('Error updating jump context:', e);
     }
 
     onHandDetected?.({ normalizedX: normX, normalizedY: normY, lane, isClosed });
-  }, [onHandDetected, setLaneFromContext, setJumpFromContext]);
+  }, [onHandDetected, setLaneFromContext, setJumpFromContext, setIsClosedFromContext]);
 
   // FUNCIÓN DE LIMPIEZA COMPLETA - CRÍTICA
   const cleanupAll = useCallback(() => {

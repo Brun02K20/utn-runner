@@ -48,6 +48,32 @@ const CharacterModel = forwardRef<Group, CharacterModelProps>(
       if (groupRef.current) {
         // Rotación sutil del personaje
         //groupRef.current.rotation.y += delta * 0.00000002
+        
+        // Efecto visual de invulnerabilidad
+        if (isInvulnerable && scene) {
+          scene.traverse((child) => {
+            if (child instanceof THREE.Mesh && child.material) {
+              // Crear efecto de brillo verde sutil
+              const material = child.material as THREE.MeshStandardMaterial
+              if (material.emissive) {
+                const intensity = Math.sin(state.clock.elapsedTime * 8) * 0.3 + 0.3
+                material.emissive.setRGB(0, intensity * 0.4, 0)
+                material.emissiveIntensity = intensity
+              }
+            }
+          })
+        } else if (scene) {
+          // Restaurar colores normales cuando no es invulnerable
+          scene.traverse((child) => {
+            if (child instanceof THREE.Mesh && child.material) {
+              const material = child.material as THREE.MeshStandardMaterial
+              if (material.emissive) {
+                material.emissive.setRGB(0, 0, 0)
+                material.emissiveIntensity = 0
+              }
+            }
+          })
+        }
       }
     })
 
@@ -57,8 +83,29 @@ const CharacterModel = forwardRef<Group, CharacterModelProps>(
         <group ref={ref || groupRef} position={position}>
           <mesh>
             <boxGeometry args={[0.8, 0.8, 0.8]} />
-            <meshStandardMaterial color="blue" />
+            <meshStandardMaterial 
+              color={isInvulnerable ? "#00ff44" : "blue"}
+              emissive={isInvulnerable ? "#004400" : "#000000"}
+              emissiveIntensity={isInvulnerable ? 0.3 : 0}
+            />
           </mesh>
+          
+          {/* Efectos de invulnerabilidad para el fallback */}
+          {isInvulnerable && (
+            <>
+              <mesh position={[0, 0.5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+                <ringGeometry args={[0.8, 1.2, 24]} />
+                <meshStandardMaterial
+                  color="#00ff00"
+                  emissive="#00ff00"
+                  emissiveIntensity={0.6}
+                  transparent
+                  opacity={0.4}
+                />
+              </mesh>
+              <pointLight position={[0, 0.5, 0]} intensity={1} distance={3} color="#00ff44" />
+            </>
+          )}
         </group>
       )
     }
@@ -69,6 +116,36 @@ const CharacterModel = forwardRef<Group, CharacterModelProps>(
     return (
       <group ref={ref || groupRef} position={position}>
         <primitive object={characterModel} scale={[0.5, 0.5, 0.5]} />
+        
+        {/* Anillo de protección cuando es invulnerable */}
+        {isInvulnerable && (
+          <>
+            {/* Anillo exterior brillante */}
+            <mesh position={[0, 0.5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+              <ringGeometry args={[0.8, 1.2, 24]} />
+              <meshStandardMaterial
+                color="#00ff00"
+                emissive="#00ff00"
+                emissiveIntensity={0.6}
+                transparent
+                opacity={0.4}
+              />
+            </mesh>
+            
+            {/* Partículas flotantes */}
+            <mesh position={[0, 1, 0]}>
+              <sphereGeometry args={[0.05, 8, 8]} />
+              <meshStandardMaterial
+                color="#00ff88"
+                emissive="#00ff88"
+                emissiveIntensity={0.8}
+              />
+            </mesh>
+            
+            {/* Luz verde sutil */}
+            <pointLight position={[0, 0.5, 0]} intensity={1} distance={3} color="#00ff44" />
+          </>
+        )}
       </group>
     )
   }
