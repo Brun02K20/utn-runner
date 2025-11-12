@@ -3,7 +3,8 @@
 import { Canvas } from "@react-three/fiber"
 import Player from "./Player"
 import UIOverlay from "./UIOverlay"
-import { Suspense, useState, useEffect } from "react"
+import MiniGameOverlay from "./MiniGameOverlay"
+import { Suspense, useState, useEffect, useRef } from "react"
 import { GAME_CONFIG, updateGameDifficulty } from "./config"
 import HandCameraImpl from "../vision/HandCameraImpl"
 import { gameTimeManager } from "./GameTimeManager"
@@ -14,6 +15,8 @@ export default function GameScene() {
   const [score, setScore] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [finalScore, setFinalScore] = useState(0)
+  const [isMiniGameActive, setIsMiniGameActive] = useState(false)
+  const miniGameCompleteRef = useRef<((won: boolean) => void) | null>(null)
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -29,6 +32,20 @@ export default function GameScene() {
   const handleGameOver = () => {
     setFinalScore(score)
     setIsGameOver(true)
+  }
+
+  const handleMiniGameStart = () => {
+    setIsMiniGameActive(true)
+  }
+
+  const handleMiniGameEnd = () => {
+    setIsMiniGameActive(false)
+  }
+
+  const handleMiniGameComplete = (won: boolean) => {
+    if (miniGameCompleteRef.current) {
+      miniGameCompleteRef.current(won)
+    }
   }
 
   const handleRestart = () => {
@@ -81,7 +98,16 @@ export default function GameScene() {
           />
 
           {/* Player */}
-          <Player onGameOver={handleGameOver} isGameOver={isGameOver} isPaused={isPaused} onScoreUpdate={setScore} />
+          <Player 
+            onGameOver={handleGameOver} 
+            isGameOver={isGameOver} 
+            isPaused={isPaused} 
+            onScoreUpdate={setScore}
+            onMiniGameStart={handleMiniGameStart}
+            onMiniGameEnd={handleMiniGameEnd}
+            isMiniGameActive={isMiniGameActive}
+            miniGameCompleteRef={miniGameCompleteRef}
+          />
         </Suspense>
       </Canvas>
 
@@ -91,6 +117,12 @@ export default function GameScene() {
         isPaused={isPaused}
         finalScore={finalScore}
         onRestart={handleRestart}
+      />
+
+      {/* MiniGame Overlay */}
+      <MiniGameOverlay
+        isVisible={isMiniGameActive}
+        onComplete={handleMiniGameComplete}
       />
 
       {/* Debug panel - set visible={true} to enable */}
@@ -105,7 +137,7 @@ export default function GameScene() {
             }}
             width={640}
             height={240}
-            isPaused={isPaused || isGameOver}
+            isPaused={(isPaused || isGameOver) && !isMiniGameActive}
           />
         </div>
       </div>

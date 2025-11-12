@@ -57,58 +57,14 @@ const CharacterModel = forwardRef<Group, CharacterModelProps>(
         <group ref={ref || groupRef} position={position}>
           <mesh>
             <boxGeometry args={[0.8, 0.8, 0.8]} />
-            <meshStandardMaterial 
-              color={isInvulnerable ? "#00FF00" : "blue"}
-              emissive={isInvulnerable ? "#004400" : "#000000"}
-              emissiveIntensity={isInvulnerable ? 0.3 : 0}
-            />
+            <meshStandardMaterial color="blue" />
           </mesh>
         </group>
       )
     }
 
-    // Aplicar color verde cuando es invulnerable
+    // Mantener siempre los colores originales del modelo
     const characterModel = scene.clone()
-    if (isInvulnerable) {
-      characterModel.traverse((child) => {
-        if (child instanceof THREE.Mesh && child.material) {
-          if (Array.isArray(child.material)) {
-            child.material.forEach((mat) => {
-              if (mat instanceof THREE.MeshStandardMaterial) {
-                mat.color.setHex(0x00ff00)
-                mat.emissive.setHex(0x004400)
-                mat.emissiveIntensity = 0.3
-              }
-            })
-          } else if (child.material instanceof THREE.MeshStandardMaterial) {
-            child.material.color.setHex(0x00ff00)
-            child.material.emissive.setHex(0x004400)
-            child.material.emissiveIntensity = 0.3
-          }
-        }
-      })
-    } else {
-      // Mantener colores originales del modelo (no forzar blanco)
-      characterModel.traverse((child) => {
-        if (child instanceof THREE.Mesh && child.material) {
-          if (Array.isArray(child.material)) {
-            child.material.forEach((mat) => {
-              if (mat instanceof THREE.MeshStandardMaterial) {
-                // Solo resetear la emisión, mantener color original
-                mat.emissive.setHex(0x000000)
-                mat.emissiveIntensity = 0
-                // No cambiar mat.color para mantener los colores originales
-              }
-            })
-          } else if (child.material instanceof THREE.MeshStandardMaterial) {
-            // Solo resetear la emisión, mantener color original
-            child.material.emissive.setHex(0x000000)
-            child.material.emissiveIntensity = 0
-            // No cambiar child.material.color para mantener los colores originales
-          }
-        }
-      })
-    }
 
     return (
       <group ref={ref || groupRef} position={position}>
