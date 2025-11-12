@@ -272,6 +272,16 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
     return false
   }
 
+  const guardarPorcentajesPorGanarMinijuego = () => {
+    // Si el jugador ganó el microjuego, guardar una variable acumulativa que vaya 
+    // aumentando un 10% cada vez que gane. Esta variable puede ser usada para
+    // dar bonificaciones en futuros microjuegos o en la puntuación final.
+    const porcentajeActual = parseFloat(localStorage.getItem('porcentajeMinijuego') || '0')
+    const nuevoPorcentaje = Math.min(100, porcentajeActual + 10)
+    localStorage.setItem('porcentajeMinijuego', nuevoPorcentaje.toString())
+    console.log(`Porcentaje acumulado por ganar minijuegos: ${nuevoPorcentaje}%`)
+  }
+
   const collectMate = (mateId: number) => {
     setMates((prev) => prev.filter((mate) => mate.id !== mateId))
 
@@ -295,10 +305,10 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
         const endTime = currentGameTime + invulnerabilityDurationInSeconds
         setInvulnerabilityEndTime(endTime)
         console.log(`Mini-game won! Invulnerability set from ${currentGameTime} to ${endTime}`)
+        guardarPorcentajesPorGanarMinijuego()
       }, 100)
     } else {
-      // El jugador perdió el microjuego - game over
-      onGameOver()
+      setMiniGameWon(false)
     }
   }
 

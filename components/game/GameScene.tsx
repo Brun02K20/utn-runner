@@ -32,7 +32,10 @@ export default function GameScene() {
   }, [isGameOver])
 
   const handleGameOver = () => {
-    setFinalScore(score)
+    const porcentajeMinijuego = parseFloat(localStorage.getItem('porcentajeMinijuego') || '0')
+    const bonificacion = (porcentajeMinijuego / 100) * score
+    setFinalScore(score + bonificacion)
+    localStorage.setItem('porcentajeMinijuego', '0')
     setIsGameOver(true)
   }
 
