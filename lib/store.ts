@@ -7,10 +7,19 @@ export interface HatItem {
   owned: boolean
 }
 
+export interface ShoeItem {
+  id: string
+  name: string
+  price: number
+  owned: boolean
+}
+
 export interface StoreData {
   coins: number
   hats: HatItem[]
+  shoes: ShoeItem[]
   equippedHat: string | null
+  equippedShoes: string | null
 }
 
 const DEFAULT_STORE_DATA: StoreData = {
@@ -21,7 +30,14 @@ const DEFAULT_STORE_DATA: StoreData = {
     { id: 'cap-premium', name: 'Gorra Premium', price: 1000, owned: false },
     { id: 'cap-legendary', name: 'Gorra Legendaria', price: 10000, owned: false },
   ],
+  shoes: [
+    { id: 'none', name: 'Sin zapatos', price: 0, owned: true },
+    { id: 'shoes-basic', name: 'Zapatillas Básicas', price: 100, owned: false },
+    { id: 'shoes-premium', name: 'Zapatillas Premium', price: 1000, owned: false },
+    { id: 'shoes-legendary', name: 'Zapatillas Legendarias', price: 10000, owned: false },
+  ],
   equippedHat: 'none',
+  equippedShoes: 'none',
 }
 
 export function getStoreData(): StoreData {
@@ -34,7 +50,14 @@ export function getStoreData(): StoreData {
   }
   
   try {
-    return JSON.parse(stored)
+    const parsed = JSON.parse(stored)
+    // Migración: asegurarse de que exista el array de shoes
+    if (!parsed.shoes) {
+      parsed.shoes = DEFAULT_STORE_DATA.shoes
+      parsed.equippedShoes = 'none'
+      localStorage.setItem('utnstore', JSON.stringify(parsed))
+    }
+    return parsed
   } catch {
     return DEFAULT_STORE_DATA
   }
@@ -83,4 +106,36 @@ export function equipHat(hatId: string): boolean {
 export function getEquippedHat(): string | null {
   const storeData = getStoreData()
   return storeData.equippedHat
+}
+
+export function buyShoes(shoesId: string): boolean {
+  const storeData = getStoreData()
+  const shoes = storeData.shoes.find(s => s.id === shoesId)
+  
+  if (!shoes || shoes.owned || storeData.coins < shoes.price) {
+    return false
+  }
+  
+  storeData.coins -= shoes.price
+  shoes.owned = true
+  saveStoreData(storeData)
+  return true
+}
+
+export function equipShoes(shoesId: string): boolean {
+  const storeData = getStoreData()
+  const shoes = storeData.shoes.find(s => s.id === shoesId)
+  
+  if (!shoes || !shoes.owned) {
+    return false
+  }
+  
+  storeData.equippedShoes = shoesId
+  saveStoreData(storeData)
+  return true
+}
+
+export function getEquippedShoes(): string | null {
+  const storeData = getStoreData()
+  return storeData.equippedShoes
 }

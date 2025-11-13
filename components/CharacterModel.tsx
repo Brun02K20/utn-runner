@@ -10,10 +10,11 @@ interface CharacterModelProps {
   isInvulnerable: boolean
   hasShield?: boolean
   equippedHat?: string
+  equippedShoes?: string
 }
 
 const CharacterModel = forwardRef<Group, CharacterModelProps>(
-  ({ position, isInvulnerable, hasShield, equippedHat }, ref) => {
+  ({ position, isInvulnerable, hasShield, equippedHat, equippedShoes }, ref) => {
     const groupRef = useRef<Group>(null)
     
     // Intentar cargar el modelo con manejo de errores
@@ -257,6 +258,132 @@ const CharacterModel = forwardRef<Group, CharacterModelProps>(
                   </mesh>
                 ))}
                 <pointLight position={[0, 0.2, 0]} intensity={0.5} distance={1} color="#fbbf24" />
+              </>
+            )}
+          </group>
+        )}
+        
+        {/* Zapatos equipados */}
+        {equippedShoes && equippedShoes !== 'none' && (
+          <group position={[0, -0.3, 0]}>
+            {equippedShoes === 'shoes-basic' && (
+              <>
+                {/* Zapatilla izquierda */}
+                <group position={[-0.2, 0, 0]}>
+                  <mesh rotation={[0, 0, 0]}>
+                    <boxGeometry args={[0.15, 0.1, 0.25]} />
+                    <meshStandardMaterial color="#f1f5f9" />
+                  </mesh>
+                  <mesh position={[0, 0.05, 0]}>
+                    <boxGeometry args={[0.16, 0.02, 0.26]} />
+                    <meshStandardMaterial color="#3b82f6" />
+                  </mesh>
+                  <mesh position={[0, -0.05, 0]}>
+                    <boxGeometry args={[0.15, 0.03, 0.25]} />
+                    <meshStandardMaterial color="#1e293b" />
+                  </mesh>
+                </group>
+                {/* Zapatilla derecha */}
+                <group position={[0.2, 0, 0]}>
+                  <mesh rotation={[0, 0, 0]}>
+                    <boxGeometry args={[0.15, 0.1, 0.25]} />
+                    <meshStandardMaterial color="#f1f5f9" />
+                  </mesh>
+                  <mesh position={[0, 0.05, 0]}>
+                    <boxGeometry args={[0.16, 0.02, 0.26]} />
+                    <meshStandardMaterial color="#3b82f6" />
+                  </mesh>
+                  <mesh position={[0, -0.05, 0]}>
+                    <boxGeometry args={[0.15, 0.03, 0.25]} />
+                    <meshStandardMaterial color="#1e293b" />
+                  </mesh>
+                </group>
+              </>
+            )}
+            {equippedShoes === 'shoes-premium' && (
+              <>
+                {/* Zapatilla izquierda */}
+                <group position={[-0.2, 0, 0]}>
+                  <mesh rotation={[0, 0, 0]}>
+                    <boxGeometry args={[0.15, 0.1, 0.25]} />
+                    <meshStandardMaterial color="#1e293b" />
+                  </mesh>
+                  <mesh position={[0, 0.05, 0]}>
+                    <boxGeometry args={[0.16, 0.02, 0.26]} />
+                    <meshStandardMaterial color="#dc2626" />
+                  </mesh>
+                  <mesh position={[0, -0.05, 0]}>
+                    <boxGeometry args={[0.15, 0.03, 0.25]} />
+                    <meshStandardMaterial color="#0f172a" />
+                  </mesh>
+                  <mesh position={[0, 0.03, 0.05]}>
+                    <sphereGeometry args={[0.02, 8, 8]} />
+                    <meshStandardMaterial color="#ef4444" />
+                  </mesh>
+                </group>
+                {/* Zapatilla derecha */}
+                <group position={[0.2, 0, 0]}>
+                  <mesh rotation={[0, 0, 0]}>
+                    <boxGeometry args={[0.15, 0.1, 0.25]} />
+                    <meshStandardMaterial color="#1e293b" />
+                  </mesh>
+                  <mesh position={[0, 0.05, 0]}>
+                    <boxGeometry args={[0.16, 0.02, 0.26]} />
+                    <meshStandardMaterial color="#dc2626" />
+                  </mesh>
+                  <mesh position={[0, -0.05, 0]}>
+                    <boxGeometry args={[0.15, 0.03, 0.25]} />
+                    <meshStandardMaterial color="#0f172a" />
+                  </mesh>
+                  <mesh position={[0, 0.03, 0.05]}>
+                    <sphereGeometry args={[0.02, 8, 8]} />
+                    <meshStandardMaterial color="#ef4444" />
+                  </mesh>
+                </group>
+              </>
+            )}
+            {equippedShoes === 'shoes-legendary' && (
+              <>
+                {/* Zapatilla izquierda */}
+                <group position={[-0.2, 0, 0]}>
+                  <mesh rotation={[0, 0, 0]}>
+                    <boxGeometry args={[0.15, 0.1, 0.25]} />
+                    <meshStandardMaterial color="#f59e0b" metalness={0.7} roughness={0.3} />
+                  </mesh>
+                  <mesh position={[0, 0.05, 0]}>
+                    <boxGeometry args={[0.16, 0.02, 0.26]} />
+                    <meshStandardMaterial color="#fef3c7" metalness={0.8} roughness={0.2} />
+                  </mesh>
+                  <mesh position={[0, -0.05, 0]}>
+                    <boxGeometry args={[0.15, 0.03, 0.25]} />
+                    <meshStandardMaterial color="#d97706" />
+                  </mesh>
+                  <mesh position={[0, 0.03, 0.05]}>
+                    <sphereGeometry args={[0.02, 8, 8]} />
+                    <meshStandardMaterial color="#dc2626" emissive="#dc2626" emissiveIntensity={0.5} />
+                  </mesh>
+                  <pointLight position={[0, 0, 0.1]} intensity={0.3} distance={0.5} color="#fbbf24" />
+                </group>
+                {/* Zapatilla derecha */}
+                <group position={[0.2, 0, 0]}>
+                  <mesh rotation={[0, 0, 0]}>
+                    <boxGeometry args={[0.15, 0.1, 0.25]} />
+                    <meshStandardMaterial color="#f59e0b" metalness={0.7} roughness={0.3} />
+                  </mesh>
+                  <mesh position={[0, 0.05, 0]}>
+                    <boxGeometry args={[0.16, 0.02, 0.26]} />
+                    <meshStandardMaterial color="#fef3c7" metalness={0.8} roughness={0.2} />
+                  </mesh>
+                  <mesh position={[0, -0.05, 0]}>
+                    <boxGeometry args={[0.15, 0.03, 0.25]} />
+                    <meshStandardMaterial color="#d97706" />
+                  </mesh>
+                  <mesh position={[0, 0.03, 0.05]}>
+                    <sphereGeometry args={[0.02, 8, 8]} />
+                    <meshStandardMaterial color="#dc2626" emissive="#dc2626" emissiveIntensity={0.5} />
+                  </mesh>
+                  <pointLight position={[0, 0, 0.1]} intensity={0.3} distance={0.5} color="#fbbf24" />
+                </group>
               </>
             )}
           </group>
