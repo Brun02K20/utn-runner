@@ -124,13 +124,13 @@ export default function MiniGame3Overlay({ isVisible, onComplete }: MiniGame3Ove
         id: rectIdCounter.current++,
         x: randomPos,
         y: -10,
-        speed: 0.5 + Math.random() * 0.5, // Velocidad reducida 75%: entre 0.5 y 1
+        speed: 0.75 + Math.random() * 0.75, // Velocidad aumentada 50%: entre 0.75 y 1.5
         width: 60,
         height: 80
       }
       
       setFallingRects(prev => [...prev, newRect])
-    }, 800) // Spawn cada 0.8 segundos
+    }, 2400) // Spawn cada 2.4 segundos (70% menos frecuente que 800ms)
     
     return () => clearInterval(spawnInterval)
   }, [isVisible, gameState])
