@@ -78,6 +78,8 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
   const [currentLane, setCurrentLane] = useState<Lane>("center")
   const [targetX, setTargetX] = useState(GAME_CONFIG.lanes.center)
   const [positionZ, setPositionZ] = useState(0)
+  
+  const [equippedHat, setEquippedHat] = useState<string>('none')
 
   const [obstacles, setObstacles] = useState<Obstacle[]>([])
   const [lastObstacleSpawn, setLastObstacleSpawn] = useState(0)
@@ -140,6 +142,19 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
   const { lane: handLane, jump: handJump } = useHandControlContext()
   const [keyboardActive, setKeyboardActive] = useState(false)
   const keyboardTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  
+  // Cargar gorro equipado desde localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('utnstore')
+      if (stored) {
+        try {
+          const storeData = JSON.parse(stored)
+          setEquippedHat(storeData.equippedHat || 'none')
+        } catch {}
+      }
+    }
+  }, [])
 
   // Handle keyboard input
   useEffect(() => {
@@ -622,6 +637,7 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
         position={[0, 0, 0]}
         isInvulnerable={isInvulnerable}
         hasShield={hasShield}
+        equippedHat={equippedHat}
       />
 
       {/* Spotlight */}

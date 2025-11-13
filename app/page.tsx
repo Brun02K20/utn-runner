@@ -12,6 +12,10 @@ export default function Home() {
             JUGAR
           </Link>
 
+          <Link href="/store" className="w-full text-center py-3 rounded border-2 border-yellow-400 arcade-font text-sm tracking-wider hover:bg-yellow-400/10 text-yellow-400">
+            💰 TIENDA
+          </Link>
+
           <Link href="/ranking" className="w-full text-center py-3 rounded border-2 border-green-400 arcade-font text-sm tracking-wider hover:bg-green-400/10 text-green-400">
             VER RANKING
           </Link>
