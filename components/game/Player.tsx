@@ -54,9 +54,11 @@ interface PlayerProps {
   miniGameCompleteRef?: React.MutableRefObject<((won: boolean) => void) | null>
   onInvulnerabilityChange?: (isInvulnerable: boolean) => void
   onInvulnerabilityTimeUpdate?: (timeLeft: number) => void
+  onMiniGame2Start?: () => void
+  activeMiniGame?: 1 | 2 | null
 }
 
-export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate, onMiniGameStart, onMiniGameEnd, isMiniGameActive, miniGameCompleteRef, onInvulnerabilityChange, onInvulnerabilityTimeUpdate }: PlayerProps) {
+export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate, onMiniGameStart, onMiniGameEnd, isMiniGameActive, miniGameCompleteRef, onInvulnerabilityChange, onInvulnerabilityTimeUpdate, onMiniGame2Start, activeMiniGame }: PlayerProps) {
   const meshRef = useRef<Group>(null)
   const terrainRef = useRef<Group>(null)
   const { camera } = useThree()
@@ -253,11 +255,19 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
 
         if (playerBox.intersectsBox(obstacleBox)) {
           console.log(`Collision detected with ${obstacle.type} - invulnerable: ${isInvulnerable}`)
-          // Choque especial con computadora - activar microjuego
+          // Choque especial con computadora - activar microjuego aleatorio
           if (obstacle.type === "pcvieja") {
-            // Remover el obstáculo de la lista y activar microjuego
+            // Remover el obstáculo de la lista y activar microjuego aleatorio
             setObstacles(prev => prev.filter(obs => obs.id !== obstacle.id))
-            onMiniGameStart()
+            
+            // Seleccionar aleatoriamente entre los dos minijuegos
+            const randomMiniGame = Math.random() < 0.5 ? 1 : 2
+            if (randomMiniGame === 1) {
+              onMiniGameStart()
+            } else if (onMiniGame2Start) {
+              onMiniGame2Start()
+            }
+            
             return false // No terminar el juego inmediatamente
           } else {
             // Otros obstáculos causan game over inmediato
