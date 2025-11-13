@@ -54,9 +54,12 @@ interface PlayerProps {
   miniGameCompleteRef?: React.MutableRefObject<((won: boolean) => void) | null>
   onInvulnerabilityChange?: (isInvulnerable: boolean) => void
   onInvulnerabilityTimeUpdate?: (timeLeft: number) => void
+  onMiniGame2Start?: () => void
+  onMiniGame3Start?: () => void
+  activeMiniGame?: 1 | 2 | 3 | null
 }
 
-export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate, onMiniGameStart, onMiniGameEnd, isMiniGameActive, miniGameCompleteRef, onInvulnerabilityChange, onInvulnerabilityTimeUpdate }: PlayerProps) {
+export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate, onMiniGameStart, onMiniGameEnd, isMiniGameActive, miniGameCompleteRef, onInvulnerabilityChange, onInvulnerabilityTimeUpdate, onMiniGame2Start, onMiniGame3Start, activeMiniGame }: PlayerProps) {
   const meshRef = useRef<Group>(null)
   const terrainRef = useRef<Group>(null)
   const { camera } = useThree()
@@ -253,11 +256,21 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
 
         if (playerBox.intersectsBox(obstacleBox)) {
           console.log(`Collision detected with ${obstacle.type} - invulnerable: ${isInvulnerable}`)
-          // Choque especial con computadora - activar microjuego
+          // Choque especial con computadora - activar microjuego aleatorio
           if (obstacle.type === "pcvieja") {
-            // Remover el obstáculo de la lista y activar microjuego
+            // Remover el obstáculo de la lista y activar microjuego aleatorio
             setObstacles(prev => prev.filter(obs => obs.id !== obstacle.id))
-            onMiniGameStart()
+            
+            // Seleccionar aleatoriamente entre los tres minijuegos
+            const randomMiniGame = Math.floor(Math.random() * 3) + 1 // 1, 2 o 3
+            if (randomMiniGame === 1) {
+              onMiniGameStart()
+            } else if (randomMiniGame === 2 && onMiniGame2Start) {
+              onMiniGame2Start()
+            } else if (randomMiniGame === 3 && onMiniGame3Start) {
+              onMiniGame3Start()
+            }
+            
             return false // No terminar el juego inmediatamente
           } else {
             // Otros obstáculos causan game over inmediato
@@ -270,6 +283,16 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
     }
 
     return false
+  }
+
+  const guardarPorcentajesPorGanarMinijuego = () => {
+    // Si el jugador ganó el microjuego, guardar una variable acumulativa que vaya 
+    // aumentando un 10% cada vez que gane. Esta variable puede ser usada para
+    // dar bonificaciones en futuros microjuegos o en la puntuación final.
+    const porcentajeActual = parseFloat(localStorage.getItem('porcentajeMinijuego') || '0')
+    const nuevoPorcentaje = Math.min(100, porcentajeActual + 10)
+    localStorage.setItem('porcentajeMinijuego', nuevoPorcentaje.toString())
+    console.log(`Porcentaje acumulado por ganar minijuegos: ${nuevoPorcentaje}%`)
   }
 
   const collectMate = (mateId: number) => {
@@ -295,10 +318,10 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
         const endTime = currentGameTime + invulnerabilityDurationInSeconds
         setInvulnerabilityEndTime(endTime)
         console.log(`Mini-game won! Invulnerability set from ${currentGameTime} to ${endTime}`)
+        guardarPorcentajesPorGanarMinijuego()
       }, 100)
     } else {
-      // El jugador perdió el microjuego - game over
-      onGameOver()
+      setMiniGameWon(false)
     }
   }
 

@@ -4,6 +4,8 @@ import { Canvas } from "@react-three/fiber"
 import Player from "./Player"
 import UIOverlay from "./UIOverlay"
 import MiniGameOverlay from "./MiniGameOverlay"
+import MiniGame2Overlay from "./MiniGame2Overlay"
+import MiniGame3Overlay from "./MiniGame3Overlay"
 import { Suspense, useState, useEffect, useRef } from "react"
 import { GAME_CONFIG, updateGameDifficulty } from "./config"
 import HandCameraImpl from "../vision/HandCameraImpl"
@@ -16,6 +18,8 @@ export default function GameScene() {
   const [isPaused, setIsPaused] = useState(false)
   const [finalScore, setFinalScore] = useState(0)
   const [isMiniGameActive, setIsMiniGameActive] = useState(false)
+  const [isMiniGame2Active, setIsMiniGame2Active] = useState(false)
+  const [isMiniGame3Active, setIsMiniGame3Active] = useState(false)
   const [isInvulnerable, setIsInvulnerable] = useState(false)
   const [invulnerabilityTimeLeft, setInvulnerabilityTimeLeft] = useState(0)
   const miniGameCompleteRef = useRef<((won: boolean) => void) | null>(null)
@@ -32,7 +36,10 @@ export default function GameScene() {
   }, [isGameOver])
 
   const handleGameOver = () => {
-    setFinalScore(score)
+    const porcentajeMinijuego = parseFloat(localStorage.getItem('porcentajeMinijuego') || '0')
+    const bonificacion = (porcentajeMinijuego / 100) * score
+    setFinalScore(score + bonificacion)
+    localStorage.setItem('porcentajeMinijuego', '0')
     setIsGameOver(true)
   }
 
@@ -44,7 +51,39 @@ export default function GameScene() {
     setIsMiniGameActive(false)
   }
 
+  const handleMiniGame2Start = () => {
+    setIsMiniGame2Active(true)
+  }
+
+  const handleMiniGame2End = () => {
+    setIsMiniGame2Active(false)
+  }
+
+  const handleMiniGame3Start = () => {
+    setIsMiniGame3Active(true)
+  }
+
+  const handleMiniGame3End = () => {
+    setIsMiniGame3Active(false)
+  }
+
   const handleMiniGameComplete = (won: boolean) => {
+    if (miniGameCompleteRef.current) {
+      miniGameCompleteRef.current(won)
+    }
+  }
+
+  const handleMiniGame2Complete = (won: boolean) => {
+    handleMiniGame2End() // Terminar el minijuego 2
+    
+    if (miniGameCompleteRef.current) {
+      miniGameCompleteRef.current(won)
+    }
+  }
+
+  const handleMiniGame3Complete = (won: boolean) => {
+    handleMiniGame3End() // Terminar el minijuego 3
+    
     if (miniGameCompleteRef.current) {
       miniGameCompleteRef.current(won)
     }
@@ -70,14 +109,14 @@ export default function GameScene() {
   }
 
   useEffect(() => {
-    // Sync pause state with game time manager
-    gameTimeManager.setPaused(isPaused || isGameOver)
+    // Sync pause state with game time manager - pausar si cualquiera de los minijuegos está activo
+    gameTimeManager.setPaused(isPaused || isGameOver || isMiniGameActive || isMiniGame2Active || isMiniGame3Active)
     
     // Update difficulty based on score
     if (!isGameOver && !isPaused) {
       updateGameDifficulty(score)
     }
-  }, [score, isGameOver, isPaused])
+  }, [score, isGameOver, isPaused, isMiniGameActive, isMiniGame2Active, isMiniGame3Active])
 
   return (
     <div className="w-full h-full relative">
@@ -110,7 +149,10 @@ export default function GameScene() {
             onScoreUpdate={setScore}
             onMiniGameStart={handleMiniGameStart}
             onMiniGameEnd={handleMiniGameEnd}
-            isMiniGameActive={isMiniGameActive}
+            onMiniGame2Start={handleMiniGame2Start}
+            onMiniGame3Start={handleMiniGame3Start}
+            isMiniGameActive={isMiniGameActive || isMiniGame2Active || isMiniGame3Active}
+            activeMiniGame={isMiniGameActive ? 1 : isMiniGame2Active ? 2 : isMiniGame3Active ? 3 : null}
             miniGameCompleteRef={miniGameCompleteRef}
             onInvulnerabilityChange={setIsInvulnerable}
             onInvulnerabilityTimeUpdate={setInvulnerabilityTimeLeft}
@@ -134,6 +176,18 @@ export default function GameScene() {
         onComplete={handleMiniGameComplete}
       />
 
+      {/* MiniGame 2 Overlay */}
+      <MiniGame2Overlay
+        isVisible={isMiniGame2Active}
+        onComplete={handleMiniGame2Complete}
+      />
+
+      {/* MiniGame 3 Overlay */}
+      <MiniGame3Overlay
+        isVisible={isMiniGame3Active}
+        onComplete={handleMiniGame3Complete}
+      />
+
       {/* Debug panel - set visible={true} to enable */}
       <GameTimeDebug visible={false} />
       
@@ -146,7 +200,7 @@ export default function GameScene() {
             }}
             width={640}
             height={240}
-            isPaused={(isPaused || isGameOver) && !isMiniGameActive}
+            isPaused={(isPaused || isGameOver) && !isMiniGameActive && !isMiniGame2Active && !isMiniGame3Active}
           />
         </div>
       </div>
