@@ -55,10 +55,11 @@ interface PlayerProps {
   onInvulnerabilityChange?: (isInvulnerable: boolean) => void
   onInvulnerabilityTimeUpdate?: (timeLeft: number) => void
   onMiniGame2Start?: () => void
-  activeMiniGame?: 1 | 2 | null
+  onMiniGame3Start?: () => void
+  activeMiniGame?: 1 | 2 | 3 | null
 }
 
-export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate, onMiniGameStart, onMiniGameEnd, isMiniGameActive, miniGameCompleteRef, onInvulnerabilityChange, onInvulnerabilityTimeUpdate, onMiniGame2Start, activeMiniGame }: PlayerProps) {
+export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate, onMiniGameStart, onMiniGameEnd, isMiniGameActive, miniGameCompleteRef, onInvulnerabilityChange, onInvulnerabilityTimeUpdate, onMiniGame2Start, onMiniGame3Start, activeMiniGame }: PlayerProps) {
   const meshRef = useRef<Group>(null)
   const terrainRef = useRef<Group>(null)
   const { camera } = useThree()
@@ -260,12 +261,14 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
             // Remover el obstáculo de la lista y activar microjuego aleatorio
             setObstacles(prev => prev.filter(obs => obs.id !== obstacle.id))
             
-            // Seleccionar aleatoriamente entre los dos minijuegos
-            const randomMiniGame = Math.random() < 0.5 ? 1 : 2
+            // Seleccionar aleatoriamente entre los tres minijuegos
+            const randomMiniGame = Math.floor(Math.random() * 3) + 1 // 1, 2 o 3
             if (randomMiniGame === 1) {
               onMiniGameStart()
-            } else if (onMiniGame2Start) {
+            } else if (randomMiniGame === 2 && onMiniGame2Start) {
               onMiniGame2Start()
+            } else if (randomMiniGame === 3 && onMiniGame3Start) {
+              onMiniGame3Start()
             }
             
             return false // No terminar el juego inmediatamente
