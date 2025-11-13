@@ -4,28 +4,40 @@ import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import { getStoreData, equipHat, type StoreData } from '@/lib/store'
+import { getStoreData, equipHat, equipShoes, type StoreData } from '@/lib/store'
 import CharacterModel from '@/components/CharacterModel'
 
 export default function Wardrobe() {
   const [storeData, setStoreData] = useState<StoreData | null>(null)
   const [selectedHat, setSelectedHat] = useState<string>('none')
+  const [selectedShoes, setSelectedShoes] = useState<string>('none')
+  const [activeTab, setActiveTab] = useState<'hats' | 'shoes'>('hats')
   const [message, setMessage] = useState<string>('')
 
   useEffect(() => {
     const data = getStoreData()
     setStoreData(data)
     setSelectedHat(data.equippedHat || 'none')
+    setSelectedShoes(data.equippedShoes || 'none')
   }, [])
 
   const handleEquip = () => {
     if (!storeData) return
     
-    const success = equipHat(selectedHat)
-    if (success) {
-      setStoreData(getStoreData())
-      setMessage('¡Gorro equipado!')
-      setTimeout(() => setMessage(''), 3000)
+    if (activeTab === 'hats') {
+      const success = equipHat(selectedHat)
+      if (success) {
+        setStoreData(getStoreData())
+        setMessage('¡Gorro equipado!')
+        setTimeout(() => setMessage(''), 3000)
+      }
+    } else {
+      const success = equipShoes(selectedShoes)
+      if (success) {
+        setStoreData(getStoreData())
+        setMessage('¡Zapatillas equipadas!')
+        setTimeout(() => setMessage(''), 3000)
+      }
     }
   }
 
@@ -38,6 +50,7 @@ export default function Wardrobe() {
   }
 
   const ownedHats = storeData.hats.filter(h => h.owned)
+  const ownedShoes = storeData.shoes.filter(s => s.owned)
 
   return (
     <div className="w-full min-h-screen bg-black text-white flex items-center justify-center p-4">
@@ -61,6 +74,7 @@ export default function Wardrobe() {
                     position={[0, 0, 0]} 
                     isInvulnerable={false}
                     equippedHat={selectedHat}
+                    equippedShoes={selectedShoes}
                   />
                   
                   <OrbitControls 
@@ -79,9 +93,33 @@ export default function Wardrobe() {
             </p>
           </div>
 
-          {/* Selección de gorros */}
+          {/* Selección de items */}
           <div className="border-2 border-purple-400/30 rounded-lg p-4">
-            <h2 className="text-xl arcade-font text-center mb-4 text-purple-300">TUS GORROS</h2>
+            <h2 className="text-xl arcade-font text-center mb-4 text-purple-300">TU VESTIMENTA</h2>
+
+            {/* Tabs */}
+            <div className="flex justify-center gap-4 mb-4">
+              <button
+                onClick={() => setActiveTab('hats')}
+                className={`px-6 py-2 rounded arcade-font text-sm ${
+                  activeTab === 'hats'
+                    ? 'bg-purple-400 text-black'
+                    : 'border-2 border-gray-400 text-gray-400 hover:border-purple-400 hover:text-purple-400'
+                }`}
+              >
+                🧢 GORROS
+              </button>
+              <button
+                onClick={() => setActiveTab('shoes')}
+                className={`px-6 py-2 rounded arcade-font text-sm ${
+                  activeTab === 'shoes'
+                    ? 'bg-purple-400 text-black'
+                    : 'border-2 border-gray-400 text-gray-400 hover:border-purple-400 hover:text-purple-400'
+                }`}
+              >
+                👟 ZAPATILLAS
+              </button>
+            </div>
 
             {message && (
               <div className="text-center mb-4 text-green-400 arcade-text animate-pulse">
@@ -89,7 +127,9 @@ export default function Wardrobe() {
               </div>
             )}
 
-            <div className="space-y-3 mb-6 max-h-96 overflow-y-auto">
+            {/* Lista de gorros */}
+            {activeTab === 'hats' && (
+              <div className="space-y-3 mb-6 max-h-96 overflow-y-auto">
               {ownedHats.map((hat) => (
                 <button
                   key={hat.id}
@@ -152,18 +192,98 @@ export default function Wardrobe() {
                 </button>
               ))}
             </div>
+            )}
+
+            {/* Lista de zapatillas */}
+            {activeTab === 'shoes' && (
+              <div className="space-y-3 mb-6 max-h-96 overflow-y-auto">
+                {ownedShoes.map((shoe) => (
+                  <button
+                    key={shoe.id}
+                    onClick={() => setSelectedShoes(shoe.id)}
+                    className={`w-full p-4 rounded-lg border-2 flex items-center gap-4 transition-colors ${
+                      selectedShoes === shoe.id
+                        ? 'border-purple-400 bg-purple-900/30'
+                        : 'border-gray-600 bg-gray-900/20 hover:border-purple-400/50'
+                    }`}
+                  >
+                    {/* Icono de las zapatillas */}
+                    <div className="w-16 h-16 flex items-center justify-center flex-shrink-0">
+                      {shoe.id === 'none' && (
+                        <div className="text-4xl">🚫</div>
+                      )}
+                      {shoe.id === 'shoes-basic' && (
+                        <svg viewBox="0 0 100 100" className="w-full h-full">
+                          <ellipse cx="50" cy="70" rx="30" ry="10" fill="#94a3b8" opacity="0.3" />
+                          <path d="M 25 60 Q 30 45 45 40 L 55 40 Q 70 45 75 60 L 70 65 Q 50 70 30 65 Z" 
+                            fill="#f1f5f9" stroke="#334155" strokeWidth="2" />
+                          <path d="M 30 50 L 70 50" stroke="#3b82f6" strokeWidth="3" strokeLinecap="round" />
+                          <path d="M 30 65 Q 50 68 70 65" fill="#1e293b" />
+                        </svg>
+                      )}
+                      {shoe.id === 'shoes-premium' && (
+                        <svg viewBox="0 0 100 100" className="w-full h-full">
+                          <ellipse cx="50" cy="70" rx="30" ry="10" fill="#94a3b8" opacity="0.3" />
+                          <path d="M 25 60 Q 30 45 45 40 L 55 40 Q 70 45 75 60 L 70 65 Q 50 70 30 65 Z" 
+                            fill="#1e293b" stroke="#0f172a" strokeWidth="2" />
+                          <path d="M 30 50 L 70 50" stroke="#dc2626" strokeWidth="4" strokeLinecap="round" />
+                          <circle cx="40" cy="45" r="3" fill="#ef4444" />
+                          <circle cx="60" cy="45" r="3" fill="#ef4444" />
+                          <path d="M 30 65 Q 50 68 70 65" fill="#0f172a" />
+                        </svg>
+                      )}
+                      {shoe.id === 'shoes-legendary' && (
+                        <svg viewBox="0 0 100 100" className="w-full h-full">
+                          <ellipse cx="50" cy="70" rx="30" ry="10" fill="#fbbf24" opacity="0.3" />
+                          <path d="M 25 60 Q 30 45 45 40 L 55 40 Q 70 45 75 60 L 70 65 Q 50 70 30 65 Z" 
+                            fill="#f59e0b" stroke="#92400e" strokeWidth="2" />
+                          <path d="M 30 50 L 70 50" stroke="#fef3c7" strokeWidth="4" strokeLinecap="round" />
+                          <circle cx="50" cy="50" r="3" fill="#fef3c7" />
+                          <path d="M 30 65 Q 50 68 70 65" fill="#d97706" />
+                        </svg>
+                      )}
+                    </div>
+
+                    {/* Nombre */}
+                    <div className="flex-1 text-left">
+                      <div className="text-base arcade-font text-white">
+                        {shoe.name}
+                      </div>
+                      {storeData.equippedShoes === shoe.id && (
+                        <div className="text-xs arcade-text text-green-400 mt-1">
+                          ✓ Equipado
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Indicador de selección */}
+                    {selectedShoes === shoe.id && (
+                      <div className="w-6 h-6 rounded-full bg-purple-400 flex items-center justify-center">
+                        <div className="w-3 h-3 rounded-full bg-white" />
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Botón equipar */}
             <button
               onClick={handleEquip}
-              disabled={selectedHat === storeData.equippedHat}
+              disabled={
+                activeTab === 'hats' 
+                  ? selectedHat === storeData.equippedHat 
+                  : selectedShoes === storeData.equippedShoes
+              }
               className={`w-full py-3 rounded arcade-font text-sm tracking-wider transition-colors ${
-                selectedHat === storeData.equippedHat
+                (activeTab === 'hats' ? selectedHat === storeData.equippedHat : selectedShoes === storeData.equippedShoes)
                   ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                   : 'bg-purple-400 text-black hover:bg-purple-500'
               }`}
             >
-              {selectedHat === storeData.equippedHat ? 'YA EQUIPADO' : 'EQUIPAR'}
+              {(activeTab === 'hats' ? selectedHat === storeData.equippedHat : selectedShoes === storeData.equippedShoes) 
+                ? 'YA EQUIPADO' 
+                : 'EQUIPAR'}
             </button>
           </div>
         </div>

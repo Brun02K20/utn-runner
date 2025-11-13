@@ -80,6 +80,7 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
   const [positionZ, setPositionZ] = useState(0)
   
   const [equippedHat, setEquippedHat] = useState<string>('none')
+  const [equippedShoes, setEquippedShoes] = useState<string>('none')
 
   const [obstacles, setObstacles] = useState<Obstacle[]>([])
   const [lastObstacleSpawn, setLastObstacleSpawn] = useState(0)
@@ -151,6 +152,7 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
         try {
           const storeData = JSON.parse(stored)
           setEquippedHat(storeData.equippedHat || 'none')
+          setEquippedShoes(storeData.equippedShoes || 'none')
         } catch {}
       }
     }
@@ -638,6 +640,7 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
         isInvulnerable={isInvulnerable}
         hasShield={hasShield}
         equippedHat={equippedHat}
+        equippedShoes={equippedShoes}
       />
 
       {/* Spotlight */}
