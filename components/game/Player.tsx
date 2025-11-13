@@ -66,9 +66,10 @@ interface PlayerProps {
   onMiniGame4Start?: () => void
   onMiniGame5Start?: () => void
   activeMiniGame?: 1 | 2 | 3 | 4 | 5 | null
+  onHasShieldChange?: (hasShield: boolean) => void
 }
 
-export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate, onMiniGameStart, onMiniGameEnd, isMiniGameActive, miniGameCompleteRef, onInvulnerabilityChange, onInvulnerabilityTimeUpdate, onMiniGame2Start, onMiniGame3Start, onMiniGame4Start, onMiniGame5Start, activeMiniGame }: PlayerProps) {
+export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate, onMiniGameStart, onMiniGameEnd, isMiniGameActive, miniGameCompleteRef, onInvulnerabilityChange, onInvulnerabilityTimeUpdate, onMiniGame2Start, onMiniGame3Start, onMiniGame4Start, onMiniGame5Start, activeMiniGame, onHasShieldChange }: PlayerProps) {
   const meshRef = useRef<Group>(null)
   const terrainRef = useRef<Group>(null)
   const { camera } = useThree()
@@ -308,6 +309,9 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
             // Si tiene escudo y choca con libros o silla, desactivar escudo y continuar
             console.log('Shield protected from obstacle! Deactivating shield...')
             setHasShield(false)
+            if (onHasShieldChange) {
+              onHasShieldChange(false)
+            }
             setObstacles(prev => prev.filter(obs => obs.id !== obstacle.id))
             return false
           } else {
@@ -345,6 +349,9 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
   const collectUsb = (usbId: number) => {
     setUsbs((prev) => prev.filter((usb) => usb.id !== usbId))
     setHasShield(true)
+    if (onHasShieldChange) {
+      onHasShieldChange(true)
+    }
     console.log('USB collected! Shield activated!')
   }
 

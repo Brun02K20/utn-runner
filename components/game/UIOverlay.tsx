@@ -11,24 +11,42 @@ interface UIOverlayProps {
   onRestart: () => void
   isInvulnerable?: boolean
   invulnerabilityTimeLeft?: number
+  hasShield?: boolean
 }
 
-export default function UIOverlay({ score, isGameOver, isPaused, finalScore, onRestart, isInvulnerable, invulnerabilityTimeLeft }: UIOverlayProps) {
+export default function UIOverlay({ score, isGameOver, isPaused, finalScore, onRestart, isInvulnerable, invulnerabilityTimeLeft, hasShield }: UIOverlayProps) {
   const [letters, setLetters] = useState<string[]>(["", "", "", "", ""])
   const [posting, setPosting] = useState(false)
   const [posted, setPosted] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const [randomPhrase, setRandomPhrase] = useState<string>("")
   const inputsRef = useRef<Array<HTMLInputElement | null>>([])
+
+  const gameOverPhrases = [
+    "Se te paso el bondi",
+    "Se cayo Autogestion 4",
+    "Se cayo la UV",
+    "Rindio todo el mundo... menos vos",
+    "Se corto la luz en mitad del parcial",
+    "Encontraste el bug… justo después de entregar",
+    "El código funcionaba… hasta que lo ejecutaste",
+    "Error 404: motivación no encontrada.",
+    "Sin batería. Sin backup. Sin esperanza."
+  ]
 
   useEffect(() => {
     if (isGameOver) {
       // focus first input when game over
       setTimeout(() => inputsRef.current[0]?.focus(), 100)
+      // Seleccionar frase aleatoria
+      const randomIndex = Math.floor(Math.random() * gameOverPhrases.length)
+      setRandomPhrase(gameOverPhrases[randomIndex])
     } else {
       setLetters(["", "", "", "", ""])
       setPosting(false)
       setPosted(false)
       setMessage(null)
+      setRandomPhrase("")
     }
   }, [isGameOver])
   const playerToSend = (raw: string) => {
@@ -132,6 +150,15 @@ export default function UIOverlay({ score, isGameOver, isPaused, finalScore, onR
               </div>
             </div>
           )}
+          
+          {/* Indicador de escudo */}
+          {hasShield && (
+            <div className="text-xs arcade-text mt-2 text-blue-400 animate-pulse border-t border-blue-400/30 pt-2">
+              <div className="flex items-center justify-center">
+                <span>💾 BACKUP</span>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -159,6 +186,20 @@ export default function UIOverlay({ score, isGameOver, isPaused, finalScore, onR
         </div>
       )}
 
+      {/* Indicador central de escudo */}
+      {hasShield && !isGameOver && (
+        <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+          <div className="bg-blue-900/80 text-blue-100 px-6 py-3 rounded-lg border-2 border-blue-400 animate-pulse">
+            <div className="text-center">
+              <div className="text-xl arcade-font mb-1">💾 HICISTE EL BACKUP 💾</div>
+              <div className="text-sm arcade-text">
+                Tenés una segunda oportunidad
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Pause overlay */}
       {isPaused && !isGameOver && (
         <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-20">
@@ -176,7 +217,10 @@ export default function UIOverlay({ score, isGameOver, isPaused, finalScore, onR
           <div className="bg-black p-8 rounded-lg text-center max-w-md border-2 border-red-500 text-white">
             <h2 className="text-4xl arcade-title mb-6 text-red-500 drop-shadow-md">GAME OVER</h2>
             <p className="text-sm arcade-text mb-3">YOU CRASHED INTO AN OBSTACLE!</p>
-            <p className="text-lg arcade-font mb-6 text-yellow-400">FINAL SCORE: {Math.floor(finalScore)}</p>
+            <p className="text-lg arcade-font mb-2 text-yellow-400">FINAL SCORE: {Math.floor(finalScore)}</p>
+            
+            {/* Frase aleatoria */}
+            <p className="text-sm arcade-text mb-6 text-gray-400 italic">"{randomPhrase}"</p>
 
             <div className="mb-6">
               <p className="text-xs arcade-text mb-3">ENTER YOUR NAME (5 LETTERS):</p>
@@ -206,6 +250,13 @@ export default function UIOverlay({ score, isGameOver, isPaused, finalScore, onR
                 className="bg-green-500 text-white px-4 py-2 rounded-md arcade-text text-sm border-2 border-green-700 hover:opacity-90"
               >
                 PLAY AGAIN
+              </button>
+
+              <button
+                onClick={() => window.location.href = '/'}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md arcade-text text-sm border-2 border-blue-700 hover:opacity-90"
+              >
+                BACK
               </button>
             </div>
 
