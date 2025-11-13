@@ -28,6 +28,13 @@ interface Mate {
   lane: Lane
 }
 
+interface Usb {
+  id: number
+  x: number
+  z: number
+  lane: Lane
+}
+
 interface TerrainSegment {
   id: number
   z: number
@@ -56,10 +63,12 @@ interface PlayerProps {
   onInvulnerabilityTimeUpdate?: (timeLeft: number) => void
   onMiniGame2Start?: () => void
   onMiniGame3Start?: () => void
-  activeMiniGame?: 1 | 2 | 3 | null
+  onMiniGame4Start?: () => void
+  onMiniGame5Start?: () => void
+  activeMiniGame?: 1 | 2 | 3 | 4 | 5 | null
 }
 
-export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate, onMiniGameStart, onMiniGameEnd, isMiniGameActive, miniGameCompleteRef, onInvulnerabilityChange, onInvulnerabilityTimeUpdate, onMiniGame2Start, onMiniGame3Start, activeMiniGame }: PlayerProps) {
+export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate, onMiniGameStart, onMiniGameEnd, isMiniGameActive, miniGameCompleteRef, onInvulnerabilityChange, onInvulnerabilityTimeUpdate, onMiniGame2Start, onMiniGame3Start, onMiniGame4Start, onMiniGame5Start, activeMiniGame }: PlayerProps) {
   const meshRef = useRef<Group>(null)
   const terrainRef = useRef<Group>(null)
   const { camera } = useThree()
@@ -75,6 +84,11 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
 
   const [mates, setMates] = useState<Mate[]>([])
   const mateIdCounter = useRef(0)
+
+  const [usbs, setUsbs] = useState<Usb[]>([])
+  const usbIdCounter = useRef(0)
+
+  const [hasShield, setHasShield] = useState(false)
 
   const [isInvulnerable, setIsInvulnerable] = useState(false)
   const [invulnerabilityEndTime, setInvulnerabilityEndTime] = useState(0)
@@ -246,6 +260,19 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
       }
     }
 
+    // Colisión con USB
+    for (const usb of usbs) {
+      const usbBox = new THREE.Box3().setFromCenterAndSize(
+        new THREE.Vector3(usb.x, GAME_CONFIG.usb.height, usb.z),
+        new THREE.Vector3(GAME_CONFIG.usb.size, GAME_CONFIG.usb.size, GAME_CONFIG.usb.size),
+      )
+
+      if (playerBox.intersectsBox(usbBox)) {
+        collectUsb(usb.id)
+        return false
+      }
+    }
+
     if (!isInvulnerable) {
       for (const obstacle of obstacles) {
         // Usar un tamaño de colisión genérico para todos los modelos 3D
@@ -255,25 +282,36 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
         )
 
         if (playerBox.intersectsBox(obstacleBox)) {
-          console.log(`Collision detected with ${obstacle.type} - invulnerable: ${isInvulnerable}`)
+          console.log(`Collision detected with ${obstacle.type} - invulnerable: ${isInvulnerable}, shield: ${hasShield}`)
+          
           // Choque especial con computadora - activar microjuego aleatorio
           if (obstacle.type === "pcvieja") {
             // Remover el obstáculo de la lista y activar microjuego aleatorio
             setObstacles(prev => prev.filter(obs => obs.id !== obstacle.id))
             
-            // Seleccionar aleatoriamente entre los tres minijuegos
-            const randomMiniGame = Math.floor(Math.random() * 3) + 1 // 1, 2 o 3
+            // Seleccionar aleatoriamente entre los cinco minijuegos
+            const randomMiniGame = Math.floor(Math.random() * 5) + 1 // 1, 2, 3, 4 o 5
             if (randomMiniGame === 1) {
               onMiniGameStart()
             } else if (randomMiniGame === 2 && onMiniGame2Start) {
               onMiniGame2Start()
             } else if (randomMiniGame === 3 && onMiniGame3Start) {
               onMiniGame3Start()
+            } else if (randomMiniGame === 4 && onMiniGame4Start) {
+              onMiniGame4Start()
+            } else if (randomMiniGame === 5 && onMiniGame5Start) {
+              onMiniGame5Start()
             }
             
             return false // No terminar el juego inmediatamente
+          } else if (hasShield && (obstacle.type === "libros" || obstacle.type === "silla")) {
+            // Si tiene escudo y choca con libros o silla, desactivar escudo y continuar
+            console.log('Shield protected from obstacle! Deactivating shield...')
+            setHasShield(false)
+            setObstacles(prev => prev.filter(obs => obs.id !== obstacle.id))
+            return false
           } else {
-            // Otros obstáculos causan game over inmediato
+            // Otros obstáculos causan game over inmediato (o si no tiene escudo)
             return true
           }
         }
@@ -302,6 +340,12 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
     // Convert milliseconds to seconds for gameTime
     const invulnerabilityDurationInSeconds = GAME_CONFIG.mate.invulnerabilityDuration / 1000
     setInvulnerabilityEndTime(gameTimeManager.getGameTime() + invulnerabilityDurationInSeconds)
+  }
+
+  const collectUsb = (usbId: number) => {
+    setUsbs((prev) => prev.filter((usb) => usb.id !== usbId))
+    setHasShield(true)
+    console.log('USB collected! Shield activated!')
   }
 
   const handleMiniGameComplete = (won: boolean) => {
@@ -350,6 +394,7 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
 
     setObstacles((prev) => [...prev, newObstacle])
 
+    // Spawn mate con cierta probabilidad
     if (Math.random() < GAME_CONFIG.mate.spawnChance) {
       const newMate: Mate = {
         id: mateIdCounter.current++,
@@ -359,6 +404,18 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
       }
 
       setMates((prev) => [...prev, newMate])
+    }
+
+    // Spawn USB con cierta probabilidad
+    if (Math.random() < GAME_CONFIG.usb.spawnChance) {
+      const newUsb: Usb = {
+        id: usbIdCounter.current++,
+        x: laneX,
+        z: currentZ + GAME_CONFIG.obstacles.spawnDistance,
+        lane: randomLane,
+      }
+
+      setUsbs((prev) => [...prev, newUsb])
     }
   }
 
@@ -517,6 +574,7 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
     // Cleanup old objects
     setObstacles((prev) => prev.filter((obstacle) => obstacle.z > newZ - 20))
     setMates((prev) => prev.filter((mate) => mate.z > newZ - 20))
+    setUsbs((prev) => prev.filter((usb) => usb.z > newZ - 20))
     setWallImages((prev) => prev.filter((image) => image.z > newZ - 20))
 
     // Collision detection (skip during freeze recovery to prevent false positives)
@@ -556,6 +614,7 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
         ref={meshRef}
         position={[0, 0, 0]}
         isInvulnerable={isInvulnerable}
+        hasShield={hasShield}
       />
 
       {/* Spotlight */}
@@ -576,7 +635,7 @@ export default function Player({ onGameOver, isGameOver, isPaused, onScoreUpdate
       <Terrain ref={terrainRef} terrainSegments={terrainSegments} tunnelLights={tunnelLights} wallImages={wallImages} playerZ={positionZ} />
 
       {/* Obstacles and Mates */}
-      <Obstacles obstacles={obstacles} mates={mates} onCollectMate={collectMate} />
+      <Obstacles obstacles={obstacles} mates={mates} usbs={usbs} onCollectMate={collectMate} onCollectUsb={collectUsb} />
     </>
   )
 }

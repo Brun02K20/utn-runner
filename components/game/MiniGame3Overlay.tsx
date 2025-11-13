@@ -36,11 +36,11 @@ export default function MiniGame3Overlay({ isVisible, onComplete }: MiniGame3Ove
   const GAME_WIDTH = 600
   const GAME_HEIGHT = 400
   
-  // Mapear lane a posición X
+  // Mapear lane a posición X (invertido porque la cámara es como un espejo)
   const laneToPosition: Record<string, number> = {
-    'left': 20,
+    'left': 80,
     'center': 50,
-    'right': 80
+    'right': 20
   }
   
   // Fase de preparación (countdown)

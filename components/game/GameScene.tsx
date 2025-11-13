@@ -6,6 +6,8 @@ import UIOverlay from "./UIOverlay"
 import MiniGameOverlay from "./MiniGameOverlay"
 import MiniGame2Overlay from "./MiniGame2Overlay"
 import MiniGame3Overlay from "./MiniGame3Overlay"
+import MiniGame4Overlay from "./MiniGame4Overlay"
+import MiniGame5Overlay from "./MiniGame5Overlay"
 import { Suspense, useState, useEffect, useRef } from "react"
 import { GAME_CONFIG, updateGameDifficulty } from "./config"
 import HandCameraImpl from "../vision/HandCameraImpl"
@@ -20,6 +22,8 @@ export default function GameScene() {
   const [isMiniGameActive, setIsMiniGameActive] = useState(false)
   const [isMiniGame2Active, setIsMiniGame2Active] = useState(false)
   const [isMiniGame3Active, setIsMiniGame3Active] = useState(false)
+  const [isMiniGame4Active, setIsMiniGame4Active] = useState(false)
+  const [isMiniGame5Active, setIsMiniGame5Active] = useState(false)
   const [isInvulnerable, setIsInvulnerable] = useState(false)
   const [invulnerabilityTimeLeft, setInvulnerabilityTimeLeft] = useState(0)
   const miniGameCompleteRef = useRef<((won: boolean) => void) | null>(null)
@@ -67,6 +71,22 @@ export default function GameScene() {
     setIsMiniGame3Active(false)
   }
 
+  const handleMiniGame4Start = () => {
+    setIsMiniGame4Active(true)
+  }
+
+  const handleMiniGame4End = () => {
+    setIsMiniGame4Active(false)
+  }
+
+  const handleMiniGame5Start = () => {
+    setIsMiniGame5Active(true)
+  }
+
+  const handleMiniGame5End = () => {
+    setIsMiniGame5Active(false)
+  }
+
   const handleMiniGameComplete = (won: boolean) => {
     if (miniGameCompleteRef.current) {
       miniGameCompleteRef.current(won)
@@ -83,6 +103,22 @@ export default function GameScene() {
 
   const handleMiniGame3Complete = (won: boolean) => {
     handleMiniGame3End() // Terminar el minijuego 3
+    
+    if (miniGameCompleteRef.current) {
+      miniGameCompleteRef.current(won)
+    }
+  }
+
+  const handleMiniGame4Complete = (won: boolean) => {
+    handleMiniGame4End() // Terminar el minijuego 4
+    
+    if (miniGameCompleteRef.current) {
+      miniGameCompleteRef.current(won)
+    }
+  }
+
+  const handleMiniGame5Complete = (won: boolean) => {
+    handleMiniGame5End() // Terminar el minijuego 5
     
     if (miniGameCompleteRef.current) {
       miniGameCompleteRef.current(won)
@@ -110,13 +146,13 @@ export default function GameScene() {
 
   useEffect(() => {
     // Sync pause state with game time manager - pausar si cualquiera de los minijuegos está activo
-    gameTimeManager.setPaused(isPaused || isGameOver || isMiniGameActive || isMiniGame2Active || isMiniGame3Active)
+    gameTimeManager.setPaused(isPaused || isGameOver || isMiniGameActive || isMiniGame2Active || isMiniGame3Active || isMiniGame4Active || isMiniGame5Active)
     
     // Update difficulty based on score
     if (!isGameOver && !isPaused) {
       updateGameDifficulty(score)
     }
-  }, [score, isGameOver, isPaused, isMiniGameActive, isMiniGame2Active, isMiniGame3Active])
+  }, [score, isGameOver, isPaused, isMiniGameActive, isMiniGame2Active, isMiniGame3Active, isMiniGame4Active, isMiniGame5Active])
 
   return (
     <div className="w-full h-full relative">
@@ -151,8 +187,10 @@ export default function GameScene() {
             onMiniGameEnd={handleMiniGameEnd}
             onMiniGame2Start={handleMiniGame2Start}
             onMiniGame3Start={handleMiniGame3Start}
-            isMiniGameActive={isMiniGameActive || isMiniGame2Active || isMiniGame3Active}
-            activeMiniGame={isMiniGameActive ? 1 : isMiniGame2Active ? 2 : isMiniGame3Active ? 3 : null}
+            onMiniGame4Start={handleMiniGame4Start}
+            onMiniGame5Start={handleMiniGame5Start}
+            isMiniGameActive={isMiniGameActive || isMiniGame2Active || isMiniGame3Active || isMiniGame4Active || isMiniGame5Active}
+            activeMiniGame={isMiniGameActive ? 1 : isMiniGame2Active ? 2 : isMiniGame3Active ? 3 : isMiniGame4Active ? 4 : isMiniGame5Active ? 5 : null}
             miniGameCompleteRef={miniGameCompleteRef}
             onInvulnerabilityChange={setIsInvulnerable}
             onInvulnerabilityTimeUpdate={setInvulnerabilityTimeLeft}
@@ -188,6 +226,19 @@ export default function GameScene() {
         onComplete={handleMiniGame3Complete}
       />
 
+      {/* MiniGame 4 Overlay */}
+      <MiniGame4Overlay
+        isVisible={isMiniGame4Active}
+        onComplete={handleMiniGame4Complete}
+      />
+
+      {/* MiniGame 5 Overlay */}
+      {isMiniGame5Active && (
+        <MiniGame5Overlay
+          onComplete={handleMiniGame5Complete}
+        />
+      )}
+
       {/* Debug panel - set visible={true} to enable */}
       <GameTimeDebug visible={false} />
       
@@ -200,7 +251,7 @@ export default function GameScene() {
             }}
             width={640}
             height={240}
-            isPaused={(isPaused || isGameOver) && !isMiniGameActive && !isMiniGame2Active && !isMiniGame3Active}
+            isPaused={(isPaused || isGameOver) && !isMiniGameActive && !isMiniGame2Active && !isMiniGame3Active && !isMiniGame4Active && !isMiniGame5Active}
           />
         </div>
       </div>

@@ -1,6 +1,7 @@
 "use client"
 
 import MateModel from "../MateModel"
+import UsbModel from "../UsbModel"
 import ObstacleModel from "../ObstacleModel"
 import { GAME_CONFIG } from "./config"
 
@@ -19,13 +20,22 @@ interface Mate {
   lane: string
 }
 
+interface Usb {
+  id: number
+  x: number
+  z: number
+  lane: string
+}
+
 interface ObstaclesProps {
   obstacles: Obstacle[]
   mates: Mate[]
+  usbs: Usb[]
   onCollectMate: (mateId: number) => void
+  onCollectUsb: (usbId: number) => void
 }
 
-export default function Obstacles({ obstacles, mates, onCollectMate }: ObstaclesProps) {
+export default function Obstacles({ obstacles, mates, usbs, onCollectMate, onCollectUsb }: ObstaclesProps) {
   return (
     <>
       {/* Obstacles */}
@@ -43,6 +53,15 @@ export default function Obstacles({ obstacles, mates, onCollectMate }: Obstacles
           key={mate.id}
           position={[mate.x, GAME_CONFIG.mate.height, mate.z]}
           onCollect={() => onCollectMate(mate.id)}
+        />
+      ))}
+
+      {/* USBs */}
+      {usbs.map((usb) => (
+        <UsbModel
+          key={usb.id}
+          position={[usb.x, GAME_CONFIG.usb.height, usb.z]}
+          onCollect={() => onCollectUsb(usb.id)}
         />
       ))}
     </>
