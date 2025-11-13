@@ -63,12 +63,39 @@ export default function Wardrobe() {
             <h2 className="text-xl arcade-font text-center mb-4 text-purple-300">PREVIEW</h2>
             
             <div className="w-full h-96 bg-gradient-to-b from-gray-900 to-black rounded-lg overflow-hidden">
-              <Canvas camera={{ position: [0, 2, 5], fov: 50 }}>
+              <Canvas 
+                camera={{ position: [0, 2, 5], fov: 50 }}
+                shadows
+              >
                 <Suspense fallback={null}>
                   <color attach="background" args={['#111111']} />
-                  <ambientLight intensity={0.5} />
-                  <directionalLight position={[5, 5, 5]} intensity={1} />
-                  <pointLight position={[-5, 5, 5]} intensity={0.5} color="#8b5cf6" />
+                  
+                  {/* Luz ambiental tenue */}
+                  <ambientLight intensity={0.3} />
+                  
+                  {/* Luz direccional amarilla tenue desde arriba */}
+                  <directionalLight 
+                    position={[0, 8, 0]} 
+                    intensity={0.8} 
+                    color="#fbbf24"
+                    castShadow
+                    shadow-mapSize-width={1024}
+                    shadow-mapSize-height={1024}
+                    shadow-camera-far={20}
+                    shadow-camera-left={-5}
+                    shadow-camera-right={5}
+                    shadow-camera-top={5}
+                    shadow-camera-bottom={-5}
+                  />
+                  
+                  {/* Luz de relleno sutil */}
+                  <pointLight position={[-3, 2, 3]} intensity={0.3} color="#8b5cf6" />
+                  
+                  {/* Plano para recibir sombras */}
+                  <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
+                    <planeGeometry args={[10, 10]} />
+                    <shadowMaterial opacity={0.4} />
+                  </mesh>
                   
                   <CharacterModel 
                     position={[0, 0, 0]} 

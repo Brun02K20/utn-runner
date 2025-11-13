@@ -144,6 +144,14 @@ const CharacterModel = forwardRef<Group, CharacterModelProps>(
 
     // Mantener siempre los colores originales del modelo
     const characterModel = scene.clone()
+    
+    // Habilitar sombras en el modelo
+    characterModel.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.castShadow = true
+        child.receiveShadow = true
+      }
+    })
 
     return (
       <group ref={ref || groupRef} position={position}>
