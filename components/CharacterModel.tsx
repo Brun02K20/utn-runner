@@ -8,10 +8,11 @@ import * as THREE from "three"
 interface CharacterModelProps {
   position: [number, number, number]
   isInvulnerable: boolean
+  hasShield?: boolean
 }
 
 const CharacterModel = forwardRef<Group, CharacterModelProps>(
-  ({ position, isInvulnerable }, ref) => {
+  ({ position, isInvulnerable, hasShield }, ref) => {
     const groupRef = useRef<Group>(null)
     
     // Intentar cargar el modelo con manejo de errores
@@ -49,7 +50,7 @@ const CharacterModel = forwardRef<Group, CharacterModelProps>(
         // Rotación sutil del personaje
         //groupRef.current.rotation.y += delta * 0.00000002
         
-        // Efecto visual de invulnerabilidad
+        // Efecto visual de invulnerabilidad (verde)
         if (isInvulnerable && scene) {
           scene.traverse((child) => {
             if (child instanceof THREE.Mesh && child.material) {
@@ -62,8 +63,20 @@ const CharacterModel = forwardRef<Group, CharacterModelProps>(
               }
             }
           })
+        } else if (hasShield && scene) {
+          // Efecto visual de escudo (azul)
+          scene.traverse((child) => {
+            if (child instanceof THREE.Mesh && child.material) {
+              const material = child.material as THREE.MeshStandardMaterial
+              if (material.emissive) {
+                const intensity = Math.sin(state.clock.elapsedTime * 6) * 0.2 + 0.2
+                material.emissive.setRGB(0, intensity * 0.5, intensity)
+                material.emissiveIntensity = intensity
+              }
+            }
+          })
         } else if (scene) {
-          // Restaurar colores normales cuando no es invulnerable
+          // Restaurar colores normales cuando no es invulnerable ni tiene escudo
           scene.traverse((child) => {
             if (child instanceof THREE.Mesh && child.material) {
               const material = child.material as THREE.MeshStandardMaterial
@@ -84,9 +97,9 @@ const CharacterModel = forwardRef<Group, CharacterModelProps>(
           <mesh>
             <boxGeometry args={[0.8, 0.8, 0.8]} />
             <meshStandardMaterial 
-              color={isInvulnerable ? "#00ff44" : "blue"}
-              emissive={isInvulnerable ? "#004400" : "#000000"}
-              emissiveIntensity={isInvulnerable ? 0.3 : 0}
+              color={isInvulnerable ? "#00ff44" : hasShield ? "#00BFFF" : "blue"}
+              emissive={isInvulnerable ? "#004400" : hasShield ? "#004488" : "#000000"}
+              emissiveIntensity={isInvulnerable || hasShield ? 0.3 : 0}
             />
           </mesh>
           
@@ -106,6 +119,23 @@ const CharacterModel = forwardRef<Group, CharacterModelProps>(
               <pointLight position={[0, 0.5, 0]} intensity={1} distance={3} color="#00ff44" />
             </>
           )}
+          
+          {/* Efectos de escudo para el fallback */}
+          {hasShield && (
+            <>
+              <mesh position={[0, 0.5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+                <ringGeometry args={[0.8, 1.2, 24]} />
+                <meshStandardMaterial
+                  color="#00BFFF"
+                  emissive="#00BFFF"
+                  emissiveIntensity={0.6}
+                  transparent
+                  opacity={0.4}
+                />
+              </mesh>
+              <pointLight position={[0, 0.5, 0]} intensity={1} distance={3} color="#00BFFF" />
+            </>
+          )}
         </group>
       )
     }
@@ -117,7 +147,7 @@ const CharacterModel = forwardRef<Group, CharacterModelProps>(
       <group ref={ref || groupRef} position={position}>
         <primitive object={characterModel} scale={[0.5, 0.5, 0.5]} />
         
-        {/* Anillo de protección cuando es invulnerable */}
+        {/* Anillo de protección cuando es invulnerable (verde) */}
         {isInvulnerable && (
           <>
             {/* Anillo exterior brillante */}
@@ -144,6 +174,36 @@ const CharacterModel = forwardRef<Group, CharacterModelProps>(
             
             {/* Luz verde sutil */}
             <pointLight position={[0, 0.5, 0]} intensity={1} distance={3} color="#00ff44" />
+          </>
+        )}
+        
+        {/* Anillo de escudo cuando tiene USB (azul) */}
+        {hasShield && (
+          <>
+            {/* Anillo exterior brillante azul */}
+            <mesh position={[0, 0.5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+              <ringGeometry args={[0.8, 1.2, 24]} />
+              <meshStandardMaterial
+                color="#00BFFF"
+                emissive="#00BFFF"
+                emissiveIntensity={0.6}
+                transparent
+                opacity={0.4}
+              />
+            </mesh>
+            
+            {/* Partículas flotantes azules */}
+            <mesh position={[0, 1, 0]}>
+              <sphereGeometry args={[0.05, 8, 8]} />
+              <meshStandardMaterial
+                color="#00BFFF"
+                emissive="#00BFFF"
+                emissiveIntensity={0.8}
+              />
+            </mesh>
+            
+            {/* Luz azul sutil */}
+            <pointLight position={[0, 0.5, 0]} intensity={1} distance={3} color="#00BFFF" />
           </>
         )}
       </group>

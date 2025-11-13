@@ -17,8 +17,13 @@ export const GAME_CONFIG = {
   },
   mate: {
     size: 0.5,
-    spawnChance: 0.02, // 2% chance when spawning obstacles
+    spawnChance: 0.05, // 5% chance when spawning obstacles
     invulnerabilityDuration: 5000, // 5 seconds in milliseconds
+    height: 3, // Height above obstacles
+  },
+  usb: {
+    size: 0.08,
+    spawnChance: 0.05, // 5% chance when spawning obstacles
     height: 3, // Height above obstacles
   },
   terrain: {

@@ -115,11 +115,11 @@ export default function MiniGame2Overlay({ isVisible, onComplete }: MiniGame2Ove
   useEffect(() => {
     if (!isVisible || gameState !== 'playing' || !lane || hasSelected) return
     
-    // Mapear lane a índice de opción
+    // Mapear lane a índice de opción (invertido porque la cámara es como un espejo)
     const laneToIndex: Record<string, number> = {
-      'left': 0,
+      'left': 2,
       'center': 1,
-      'right': 2
+      'right': 0
     }
     
     const optionIndex = laneToIndex[lane]
