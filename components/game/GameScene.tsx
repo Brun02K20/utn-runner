@@ -43,8 +43,23 @@ export default function GameScene() {
   const handleGameOver = () => {
     const porcentajeMinijuego = parseFloat(localStorage.getItem('porcentajeMinijuego') || '0')
     const bonificacion = (porcentajeMinijuego / 100) * score
-    setFinalScore(score + bonificacion)
+    const finalScoreValue = score + bonificacion
+    setFinalScore(finalScoreValue)
     localStorage.setItem('porcentajeMinijuego', '0')
+    
+    // Calcular y agregar monedas (10% del score final)
+    const coins = Math.floor(finalScoreValue * 0.1)
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('utnstore')
+      if (stored) {
+        try {
+          const storeData = JSON.parse(stored)
+          storeData.coins += coins
+          localStorage.setItem('utnstore', JSON.stringify(storeData))
+        } catch {}
+      }
+    }
+    
     setIsGameOver(true)
   }
 
