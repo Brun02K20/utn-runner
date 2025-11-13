@@ -26,6 +26,7 @@ export default function GameScene() {
   const [isMiniGame5Active, setIsMiniGame5Active] = useState(false)
   const [isInvulnerable, setIsInvulnerable] = useState(false)
   const [invulnerabilityTimeLeft, setInvulnerabilityTimeLeft] = useState(0)
+  const [hasShield, setHasShield] = useState(false)
   const miniGameCompleteRef = useRef<((won: boolean) => void) | null>(null)
 
   useEffect(() => {
@@ -194,6 +195,7 @@ export default function GameScene() {
             miniGameCompleteRef={miniGameCompleteRef}
             onInvulnerabilityChange={setIsInvulnerable}
             onInvulnerabilityTimeUpdate={setInvulnerabilityTimeLeft}
+            onHasShieldChange={setHasShield}
           />
         </Suspense>
       </Canvas>
@@ -206,6 +208,7 @@ export default function GameScene() {
         onRestart={handleRestart}
         isInvulnerable={isInvulnerable}
         invulnerabilityTimeLeft={invulnerabilityTimeLeft}
+        hasShield={hasShield}
       />
 
       {/* MiniGame Overlay */}

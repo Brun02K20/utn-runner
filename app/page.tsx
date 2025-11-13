@@ -16,6 +16,10 @@ export default function Home() {
             VER RANKING
           </Link>
 
+          <Link href="/instructions" className="w-full text-center py-3 rounded border-2 border-purple-400 arcade-font text-sm tracking-wider hover:bg-purple-400/10 text-purple-400">
+            INSTRUCCIONES
+          </Link>
+
           <Link href="/credits" className="w-full text-center py-3 rounded border-2 border-blue-400 arcade-font text-sm tracking-wider hover:bg-blue-400/10 text-blue-400">
             CREDITOS
           </Link>

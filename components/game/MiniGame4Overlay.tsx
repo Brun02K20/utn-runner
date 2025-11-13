@@ -132,20 +132,20 @@ export default function MiniGame4Overlay({ isVisible, onComplete }: MiniGame4Ove
 
   return (
     <div className="absolute inset-0 bg-black/90 flex items-center justify-center z-30">
-      <div className="bg-black p-8 rounded-lg text-center max-w-4xl border-4 border-red-400 text-white">
+      <div className="bg-black p-6 rounded-lg text-center max-w-2xl border-4 border-red-400 text-white max-h-[90vh] overflow-y-auto">
         
         {gameState === 'preparing' && (
           <>
-            <h2 className="text-4xl arcade-title mb-6 text-red-400">¡ENTREGÁ EL TP!</h2>
-            <p className="text-lg arcade-text mb-6 text-red-200">
+            <h2 className="text-3xl arcade-title mb-4 text-red-400">¡ENTREGÁ EL TP!</h2>
+            <p className="text-base arcade-text mb-4 text-red-200">
               ¡Son las 23:59! ¡Tenés que subir el TP antes de la medianoche!
             </p>
             
-            <div className="text-6xl arcade-font text-yellow-400 mb-4">
+            <div className="text-5xl arcade-font text-yellow-400 mb-3">
               {timeLeft > 0 ? timeLeft : "¡COMENZAR!"}
             </div>
             
-            <div className="text-lg arcade-text text-red-200">
+            <div className="text-base arcade-text text-red-200">
               Prepárate para hacer clic...
             </div>
           </>
@@ -153,49 +153,49 @@ export default function MiniGame4Overlay({ isVisible, onComplete }: MiniGame4Ove
         
         {gameState === 'playing' && (
           <>
-            <h2 className="text-3xl arcade-title mb-4 text-red-400">¡SUBÍ EL ARCHIVO!</h2>
+            <h2 className="text-2xl arcade-title mb-3 text-red-400">¡SUBÍ EL ARCHIVO!</h2>
             
             {/* Reloj de urgencia */}
-            <div className="bg-red-900 border-4 border-red-500 rounded-lg p-4 mb-6 animate-pulse">
-              <div className="text-5xl arcade-font text-red-200">
+            <div className="bg-red-900 border-4 border-red-500 rounded-lg p-3 mb-4 animate-pulse">
+              <div className="text-4xl arcade-font text-red-200">
                 {currentTime}
               </div>
-              <div className="text-sm text-red-300 mt-2">
+              <div className="text-sm text-red-300 mt-1">
                 ¡QUEDAN {Math.max(0, Math.ceil((4000 - milliseconds) / 1000))} SEGUNDOS!
               </div>
             </div>
 
             {/* Monitor de computadora con archivo subiendo */}
-            <div className="relative bg-gray-900 rounded-lg p-8 mb-6 border-4 border-red-500">
+            <div className="relative bg-gray-900 rounded-lg p-4 mb-4 border-4 border-red-500">
               {/* Pantalla del monitor */}
-              <div className="bg-gradient-to-b from-amber-50 to-yellow-50 rounded-lg p-6 border-4 border-black relative overflow-hidden">
+              <div className="bg-gradient-to-b from-amber-50 to-yellow-50 rounded-lg p-4 border-4 border-black relative overflow-hidden">
                 {/* Texto MOODLE */}
-                <div className="text-blue-600 text-2xl font-bold mb-4 arcade-title">MOODLE</div>
+                <div className="text-blue-600 text-xl font-bold mb-3 arcade-title">MOODLE</div>
                 
                 {/* Icono de archivo PDF */}
-                <div className="mb-4 flex justify-center">
-                  <div className="w-24 h-32 bg-red-600 rounded-lg shadow-lg flex items-center justify-center relative">
-                    <div className="text-white text-4xl font-bold">PDF</div>
-                    <div className="absolute -top-2 -right-2 w-12 h-12 bg-red-700 transform rotate-45" />
+                <div className="mb-3 flex justify-center">
+                  <div className="w-16 h-20 bg-red-600 rounded-lg shadow-lg flex items-center justify-center relative">
+                    <div className="text-white text-2xl font-bold">PDF</div>
+                    <div className="absolute -top-1 -right-1 w-8 h-8 bg-red-700 transform rotate-45" />
                   </div>
                 </div>
                 
-                <div className="text-gray-800 text-lg mb-4 arcade-text">TP_Final.pdf</div>
+                <div className="text-gray-800 text-base mb-3 arcade-text">TP_Final.pdf</div>
                 
                 {/* Barra de progreso */}
-                <div className="w-full bg-gray-700 rounded-full h-8 mb-4 overflow-hidden border-2 border-gray-600">
+                <div className="w-full bg-gray-700 rounded-full h-6 mb-3 overflow-hidden border-2 border-gray-600">
                   <div 
                     className="h-full bg-gradient-to-r from-green-500 to-green-400 transition-all duration-300 flex items-center justify-center"
                     style={{ width: `${uploadProgress}%` }}
                   >
                     {uploadProgress > 0 && (
-                      <span className="text-white text-sm font-bold">{uploadProgress}%</span>
+                      <span className="text-white text-xs font-bold">{uploadProgress}%</span>
                     )}
                   </div>
                 </div>
                 
                 {/* Texto de estado */}
-                <div className="text-gray-700 text-sm arcade-text">
+                <div className="text-gray-700 text-xs arcade-text">
                   {uploadProgress < 100 
                     ? `Subiendo... ${clickCount}/5 clics` 
                     : '¡Subida completa!'}
@@ -204,32 +204,32 @@ export default function MiniGame4Overlay({ isVisible, onComplete }: MiniGame4Ove
                 {/* Efecto de "loading" */}
                 {uploadProgress > 0 && uploadProgress < 100 && (
                   <div className="absolute top-2 right-2">
-                    <div className="w-6 h-6 border-4 border-gray-800 border-t-transparent rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-2 border-gray-800 border-t-transparent rounded-full animate-spin" />
                   </div>
                 )}
               </div>
               
               {/* Base del monitor */}
-              <div className="w-32 h-4 bg-gray-800 mx-auto mt-2 rounded-b-lg" />
-              <div className="w-48 h-2 bg-gray-700 mx-auto rounded-full" />
+              <div className="w-24 h-3 bg-gray-800 mx-auto mt-1 rounded-b-lg" />
+              <div className="w-32 h-1 bg-gray-700 mx-auto rounded-full" />
             </div>
 
             {/* Instrucciones */}
-            <div className="bg-red-900/30 border-2 border-red-500 rounded-lg p-4 mb-4">
-              <div className="text-lg arcade-font text-yellow-400 mb-2">
+            <div className="bg-red-900/30 border-2 border-red-500 rounded-lg p-3 mb-3">
+              <div className="text-base arcade-font text-yellow-400 mb-1">
                 {isClosed ? '✊ CLIC!' : '✋ ABRÍ LA MANO'}
               </div>
-              <div className="text-sm text-red-200">
+              <div className="text-xs text-red-200">
                 Abrí y cerrá la mano 5 veces para subir el archivo
               </div>
             </div>
             
             {/* Indicador de progreso */}
-            <div className="flex justify-center gap-2 mb-4">
+            <div className="flex justify-center gap-2 mb-2">
               {[...Array(5)].map((_, index) => (
                 <div
                   key={index}
-                  className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-bold ${
+                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-bold ${
                     index < clickCount
                       ? 'bg-green-500 border-green-400 text-white'
                       : 'bg-gray-700 border-gray-600 text-gray-400'
